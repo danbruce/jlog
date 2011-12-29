@@ -18,7 +18,12 @@ class JLogMessage
 		$this->transaction = $t->id;
 		$this->contents = $c;
 		$this->errorLevel = $l;
-		$this->_fullMessage = array(
+		$this->_fullMessage = null;
+	}
+
+	private function _constructFullMessage()
+	{
+		return array(
 			'transaction' => $this->transaction,
 			'level'       => $this->errorLevel,
 			'contents'    => $this->contents
@@ -27,6 +32,10 @@ class JLogMessage
 
 	public function __toString()
 	{
+		if (!isset($this->_fullMessage())) {
+			$this->_fullMessage = $this->_constructFullMessage();
+		}
+
 		return json_encode($this->_fullMessage, JSON_FORCE_OBJECT);
 	}
 }
