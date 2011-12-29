@@ -109,7 +109,7 @@ class JLogDatabaseTransaction extends JLogTransaction
 			if ($this->_prepareLookupStatement()) {
 				$rowCount = 1;
 				do {
-					$trans_id = hash('sha256', JLogger::generateRandomString());
+					$trans_id = hash('sha256', uniqid('', true));
 					$success = $this->_lookupUniqueIDStatement->bindParam(
 						':transID',
 						$trans_id,
