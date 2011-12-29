@@ -1,6 +1,6 @@
 <?php
 
-class JLogSettings 
+class JLogSettings
 {
 
 	const DATABASE_STORAGE = 1;

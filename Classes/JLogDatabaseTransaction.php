@@ -20,7 +20,7 @@ class JLogDatabaseTransaction extends JLogTransaction
 
 	public function write()
 	{
-		if(!$this->_prepareTransactionInsertStatement()) {
+		if (!$this->_prepareTransactionInsertStatement()) {
 			throw new JLogException(
 				'Unable to prepare transaction insert statement.'
 			);
@@ -32,12 +32,12 @@ class JLogDatabaseTransaction extends JLogTransaction
 			PDO::PARAM_STR,
 			strlen($this->id)
 		);
-		if(!$success) {
+		if (!$success) {
 			throw new JLogException(
 				'Unable to bind params to insert transaction query.'
 			);
 		}
-		if(!$this->_insertTransactionStatement->execute()) {
+		if (!$this->_insertTransactionStatement->execute()) {
 			throw new JLogException(
 				'Unable to execute insert transaction query.'
 			);
@@ -45,7 +45,7 @@ class JLogDatabaseTransaction extends JLogTransaction
 
 		$lastRowID = $this->_pdo->lastInsertId();
 
-		if(!$this->_prepareMessageInsertStatement()) {
+		if (!$this->_prepareMessageInsertStatement()) {
 			throw new JLogException(
 				'Unable to prepare message insert statement.'
 			);
@@ -57,14 +57,14 @@ class JLogDatabaseTransaction extends JLogTransaction
 			PDO::PARAM_STR,
 			strlen($this->id)
 		);
-		if(!$success) {
+		if (!$success) {
 			throw new JLogException(
 				'Unable to bind :transID param to message insert statement'
 			);
 		}
 
 		reset($this->log);
-		foreach($this->log as $message) {
+		foreach ($this->log as $message) {
 			$messageString = $message->__toString();
 			$success = $this->_insertMessageStatement->bindParam(
 				':message',
@@ -72,12 +72,12 @@ class JLogDatabaseTransaction extends JLogTransaction
 				PDO::PARAM_STR,
 				strlen($messageString)
 			);
-			if(!$success) {
+			if (!$success) {
 				throw new JLogException(
 					'Unable to bind :message param to message insert statement'
 				);
 			}
-			if(!$this->_insertMessageStatement->execute()) {
+			if (!$this->_insertMessageStatement->execute()) {
 				throw new JLogException(
 					'Unable to execute insert message statement'
 				);
@@ -92,7 +92,7 @@ class JLogDatabaseTransaction extends JLogTransaction
 			$pdoString  = $driver.':';
 			$pdoString .= 'dbname='.$database.';';
 			$pdoString .= 'host='.$host;
-			$this->_pdo = new PDO($pdoString,$username,$password);
+			$this->_pdo = new PDO($pdoString, $username, $password);
 			if (!$this->_pdo) {
 				throw new JSONException(
 					'Unable to initialize PDO object.'
@@ -106,7 +106,7 @@ class JLogDatabaseTransaction extends JLogTransaction
 	private function _generateNewID()
 	{
 		try {
-			if($this->_prepareLookupStatement()) {
+			if ($this->_prepareLookupStatement()) {
 				$rowCount = 1;
 				do {
 					$trans_id = hash('sha256', JLogger::generateRandomString());
@@ -124,7 +124,7 @@ class JLogDatabaseTransaction extends JLogTransaction
 						}
 						$rowCount = $this->_lookupUniqueIDStatement->rowCount();
 					}
-				} while($rowCount > 0);
+				} while ($rowCount > 0);
 				return $trans_id;
 			} else {
 				throw new JLogException(
