@@ -4,6 +4,7 @@ abstract class JLogTransaction
 {
 	public $id;
 	protected $log;
+	protected $transactionID;
 
 	public function __construct($id)
 	{
@@ -11,12 +12,16 @@ abstract class JLogTransaction
 		$this->log = array();
 	}
 
-	public final function log($obj)
+	public final function log($obj, $level)
 	{
 		array_push(
 			$this->log,
-			new JLogMessage($this, $obj)
+			new JLogMessage($this, $obj, $level)
 		);
+
+		if(JLogSettings::$WriteImmediately) {
+			$this->write();
+		}
 	}
 	
 	public final function flush()

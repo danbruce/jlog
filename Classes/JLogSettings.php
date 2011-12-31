@@ -3,10 +3,11 @@
 class JLogSettings
 {
 
-	const DATABASE_STORAGE = 1;
+	const MYSQL_STORAGE = 1;
 	const FILE_STORAGE = 2;
-
-	public static $StorageMethod = JLogSettings::DATABASE_STORAGE;
+	
+	public static $WriteImmediately = true;
+	public static $StorageMethod = JLogSettings::MYSQL_STORAGE;
 
 	public static $DBInfo = array(
 		'driver' => 'mysql',

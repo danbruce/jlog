@@ -32,7 +32,7 @@ class JLogMessage
 
 	public function __toString()
 	{
-		if (!isset($this->_fullMessage())) {
+		if (!isset($this->_fullMessage)) {
 			$this->_fullMessage = $this->_constructFullMessage();
 		}
 

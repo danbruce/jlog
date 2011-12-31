@@ -17,9 +17,9 @@ class JLogger
 			}
 					
 			switch (JLogSettings::$StorageMethod) {
-				case JLogSettings::DATABASE_STORAGE :
+				case JLogSettings::MYSQL_STORAGE :
 					JLogger::$_currentTransaction 
-						= new JLogDatabaseTransaction();
+						= new JLogMySQLTransaction();
 					break;
 					
 				case JLogSettings::FILE_STORAGE :
@@ -36,13 +36,33 @@ class JLogger
 		}
 	}
 
-	public static function log($obj)
+	public static function log($ob, $l = JLogMessage::WARNING)
 	{
 		try {
-			JLogger::$_currentTransaction->log($obj);
+			JLogger::$_currentTransaction->log($ob, $l);
 		} catch (JLogException $e) {
 			JLogger::dieWithError($e->getMessage());
 		}
+	}
+
+	public static function fatal($ob)
+	{
+		JLogger::log($ob, JLogMessage::FATAL);
+	}
+
+	public static function error($ob)
+	{
+		JLogger::log($ob, JLogMessage::ERROR);
+	}
+
+	public static function warning($ob)
+	{
+		JLogger::log($ob, JLogMessage::WARNING);
+	}
+
+	public static function notice($ob)
+	{
+		JLogger::log($ob, JLogMessage::NOTICE);
 	}
 
 	public static function close()
@@ -61,15 +81,6 @@ class JLogger
 	{
 		die('Caught exception with message: '.$msg."\n");
 		exit();
-	}
-
-	public static function generateRandomString($len = 20)
-	{
-		$ret = '';
-		while (strlen($ret) < $len) {
-			$ret .= chr((rand() % 90)+33);
-		}
-		return $ret;
 	}
 }
 
