@@ -5,18 +5,18 @@ class JLogMySQLTransaction extends JLogTransaction
 	private $_pdo = null;
 	private $_transactionDatabaseID = null;
 	private $_writePtr = 0;
+	private $_tablePrefix = '';
 
 	private $_lookupUniqueIDStatement = null;
 	private $_insertTransactionStatement = null;
 	private $_insertMessageStatement = null;
 	private $_updateTransactionModifyDateStatement = null;
 
-	public function __construct()
+	public function __construct($details)
 	{
 		try {
-			$this->_constructPDO();
-			$transaction_id = $this->_generateNewID();
-			parent::__construct($transaction_id);
+			$this->_constructPDO($details);
+			parent::__construct($this->_generateNewID());
 			$this->_writePtr = 0;
 		} catch (JSONException $e) {
 			throw $e;
@@ -36,12 +36,14 @@ class JLogMySQLTransaction extends JLogTransaction
 		}
 	}
 
-	private function _constructPDO()
+	private function _constructPDO($details)
 	{
 		try {
-			extract(JLogSettings::$DBInfo, EXTR_OVERWRITE);
-			$pdoString  = $driver.':';
-			$pdoString .= 'dbname='.$database.';';
+			extract($details, EXTR_OVERWRITE);
+			if (isset($tablePrefix)) {
+				$this->_tablePrefix = $tablePrefix;
+			}
+			$pdoString  = 'mysql:dbname='.$database.';';
 			$pdoString .= 'host='.$host;
 			$this->_pdo = new PDO($pdoString, $username, $password);
 			if (!$this->_pdo) {
@@ -107,7 +109,7 @@ class JLogMySQLTransaction extends JLogTransaction
 	
 	private function _prepareLookupStatement()
 	{
-		$prefix = JLogSettings::$DBInfo['tablePrefix'];
+		$prefix = $this->_tablePrefix;
 		$queryString  = 'SELECT `'.$prefix.'Transactions`.`id` ';
 		$queryString .= 'FROM `'.$prefix.'Transactions` ';
 		$queryString .= 'WHERE `'.$prefix.
@@ -121,7 +123,7 @@ class JLogMySQLTransaction extends JLogTransaction
 
 	private function _prepareTransactionInsertStatement()
 	{
-		$prefix = JLogSettings::$DBInfo['tablePrefix'];
+		$prefix = $this->_tablePrefix;
 		$queryString  = 'INSERT INTO `'.$prefix.'Transactions` ';
 		$queryString .= '(`transactionID`, `createDate`, `modifyDate`)';
 		$queryString .= 'VALUES';
@@ -134,7 +136,7 @@ class JLogMySQLTransaction extends JLogTransaction
 
 	private function _prepareMessageInsertStatement()
 	{
-		$prefix = JLogSettings::$DBInfo['tablePrefix'];
+		$prefix = $this->_tablePrefix;
 		$queryString  = 'INSERT INTO `'.$prefix.'Messages` ';
 		$queryString .= '(`transaction`, `message`)';
 		$queryString .= 'VALUES';
@@ -147,7 +149,7 @@ class JLogMySQLTransaction extends JLogTransaction
 
 	private function _prepareUpdateTransactionModifyDateStatement()
 	{
-		$prefix = JLogSettings::$DBInfo['tablePrefix'];
+		$prefix = $this->_tablePrefix;
 		$queryString  = 'UPDATE `'.$prefix.'Transactions` ';
 		$queryString .= 'SET `'.$prefix.'Transactions`.`modifyDate` = NOW() ';
 		$queryString .= 'WHERE `'.$prefix.'Transactions`.`id` = :transID';

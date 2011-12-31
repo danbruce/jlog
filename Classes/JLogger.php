@@ -15,21 +15,57 @@ class JLogger
 					'JLogger::init called more than once.'
 				);
 			}
-					
-			switch (JLogSettings::$StorageMethod) {
-				case JLogSettings::MYSQL_STORAGE :
-					JLogger::$_currentTransaction 
-						= new JLogMySQLTransaction();
-					break;
-					
-				case JLogSettings::FILE_STORAGE :
-					JLogger::$_currentTransaction 
-						= new JLogFileTransaction();
-					break;
-				default :
-					throw new JLogException(
-						'Invalid storage method specified.'
-					);
+
+			JLogger::$_currentTransaction = array();
+			foreach (JLogSettings::$groups as $group) {
+				$transactionGroup = array();
+				foreach ($group as $storage) {
+					if (is_array($storage) && isset($storage['storage'])) {
+						try {
+							switch ($storage['storage']) {
+								case 'stderr' :
+									array_push(
+										$transactionGroup,
+										new JLogStdErrTransaction($storage)
+									);
+									break;
+								case 'email' :
+									array_push(
+										$transactionGroup,
+										new JLogEmailTransaction($storage)
+									);
+									break;
+								case 'mysql' :
+									array_push(
+										$transactionGroup,
+										new JLogMySQLTransaction($storage)
+									);
+									break;
+								case 'file' :
+									array_push(
+										$transactionGroup,
+										new JLogFileTransaction($storage)
+									);
+									break;
+								default :
+									throw new JLogException(
+										'Unknown JLog storage method '.$storage
+									);
+							}
+						} catch (JLogException $e) {
+							continue;
+						}
+					}
+				}
+				if (count($transactionGroup)) {
+					array_push(JLogger::$_currentTransaction, $transactionGroup);
+				}
+			}
+
+			if (count(JLogger::$_currentTransaction) < 1) {
+				throw new JLogException(
+					'No working logging mechanism.'
+				);
 			}
 		} catch (JLogException $e) {
 			JLogger::dieWithError($e->getMessage());
@@ -39,7 +75,23 @@ class JLogger
 	public static function log($ob, $l = JLogMessage::WARNING)
 	{
 		try {
-			JLogger::$_currentTransaction->log($ob, $l);
+			foreach (JLogger::$_currentTransaction as $group) {
+				// for each transaction group we try to write to 
+				// each of the storage methods listed in the group
+				try {
+					foreach ($group as $trans) {
+						$trans->log($ob, $l);
+					}
+					// if we managed to write to every storage
+					// without catching an exception then we're done
+					return;
+				} catch(JLogException $e) {
+					// we caught an error with one of the storage
+					// methods in this group so we jump to the next
+					// group
+					continue;
+				}
+			}
 		} catch (JLogException $e) {
 			JLogger::dieWithError($e->getMessage());
 		}
@@ -67,12 +119,25 @@ class JLogger
 
 	public static function close()
 	{
-		if(JLogger::$_written) return;
-
 		try {
-			JLogger::$_currentTransaction->write();
-			JLogger::$_written = true;
-		} catch(JLogException $e) {
+			foreach (JLogger::$_currentTransaction as $group) {
+				// for each transaction group we try to write to 
+				// each of the storage methods listed in the group
+				try {
+					foreach ($group as $trans) {
+						$trans->write();
+					}
+					// if we managed to write to every storage
+					// without catching an exception then we're done
+					return;
+				} catch(JLogException $e) {
+					// we caught an error with one of the storage
+					// methods in this group so we jump to the next
+					// group
+					continue;
+				}
+			}
+		} catch (JLogException $e) {
 			JLogger::dieWithError($e->getMessage());
 		}
 	}
