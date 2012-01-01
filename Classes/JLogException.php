@@ -2,7 +2,7 @@
 
 class JLogException extends Exception
 {
-	
+    
 }
 
 ?>
