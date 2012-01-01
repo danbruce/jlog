@@ -9,3 +9,5 @@ require_once 'Classes/JLogFileTransaction.php';
 require_once 'Classes/JLogMySQLTransaction.php';
 require_once 'Classes/JLogEmailTransaction.php';
 require_once 'Classes/JLogger.php';
+
+?>

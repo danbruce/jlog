@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `JLog_Messages` (
+CREATE TABLE IF NOT EXISTS `${TABLE_PREFIX}_Messages` (
   `id` int(255) NOT NULL AUTO_INCREMENT,
   `createDate` datetime NOT NULL,
   `transaction` int(255) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `JLog_Messages` (
   KEY `transaction` (`transaction`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `JLog_Transactions` (
+CREATE TABLE IF NOT EXISTS `${TABLE_PREFIX}_Transactions` (
   `id` int(255) NOT NULL AUTO_INCREMENT,
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NOT NULL,

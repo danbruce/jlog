@@ -138,9 +138,9 @@ class JLogMySQLTransaction extends JLogTransaction
     {
         $prefix = $this->_tablePrefix;
         $queryString  = 'INSERT INTO `'.$prefix.'Messages` ';
-        $queryString .= '(`transaction`, `message`)';
+        $queryString .= '(`transaction`, `message`, `createDate`)';
         $queryString .= 'VALUES';
-        $queryString .= '(:transID, :message)';
+        $queryString .= '(:transID, :message, NOW())';
         return $this->_prepareGenericStatement(
             '_insertMessageStatement',
             $queryString
