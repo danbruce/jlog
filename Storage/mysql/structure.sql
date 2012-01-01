@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `${TABLE_PREFIX}_Messages` (
+CREATE TABLE IF NOT EXISTS `${TABLE_PREFIX}Messages` (
   `id` int(255) NOT NULL AUTO_INCREMENT,
   `createDate` datetime NOT NULL,
   `transaction` int(255) NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `${TABLE_PREFIX}_Messages` (
   KEY `transaction` (`transaction`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `${TABLE_PREFIX}_Transactions` (
+CREATE TABLE IF NOT EXISTS `${TABLE_PREFIX}Transactions` (
   `id` int(255) NOT NULL AUTO_INCREMENT,
   `createDate` datetime NOT NULL,
   `modifyDate` datetime NOT NULL,
