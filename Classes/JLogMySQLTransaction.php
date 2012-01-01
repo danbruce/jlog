@@ -159,7 +159,8 @@ class JLogMySQLTransaction extends JLogTransaction
         );
     }
 
-    private function _insertTransaction() {
+    private function _insertTransaction()
+    {
         if (!$this->_prepareTransactionInsertStatement()) {
             throw new JLogException(
                 'Unable to prepare transaction insert statement.'
