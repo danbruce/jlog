@@ -21,8 +21,8 @@ class JLogSettings
             ),
             array(
                 'storage' => 'email',
-                'to' => 'dbruce1126@gmail.com',
-                'from' => 'rnd@mediamiser.com',
+                'to' => 'toExample@example.com',
+                'from' => 'fromExample@example.com',
                 'subject' => 'JLog Message'
             )
         ),
