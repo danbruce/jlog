@@ -23,11 +23,21 @@ class JLogMessage
 
     private function _constructFullMessage()
     {
-        return array(
+        $ret = array(
             'transaction' => $this->transaction,
             'level'       => $this->errorLevel,
-            'contents'    => $this->contents
+            'contents'    => $this->contents,
         );
+
+        if (is_object($ret['contents'])) {
+            if (method_exists($ret['contents'], '__toString')) {
+                $ret['contents'] = $ret['contents']->__toString();
+            } else {
+                $ret['contents'] = serialize($ret['contents']);
+            }
+        }
+
+        return $ret;
     }
 
     public function __toString()
@@ -36,7 +46,7 @@ class JLogMessage
             $this->_fullMessage = $this->_constructFullMessage();
         }
 
-        return json_encode($this->_fullMessage, JSON_FORCE_OBJECT);
+        return json_encode($this->_fullMessage);
     }
 }
 

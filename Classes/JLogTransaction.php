@@ -4,16 +4,19 @@ abstract class JLogTransaction
 {
     public $id;
     protected $log;
-    protected $transactionID;
+    public $functioning;
 
-    public function __construct($id)
+    protected function __construct($id)
     {
         $this->id = $id;
         $this->log = array();
+        $this->functioning = true;
     }
 
     public final function log($obj, $level)
     {
+        if (!$this->functioning) return;
+
         array_push(
             $this->log,
             new JLogMessage($this, $obj, $level)
@@ -29,7 +32,7 @@ abstract class JLogTransaction
         $this->log = array();
     }
 
-    public abstract function write();
+    public abstract function write($final = false);
 }
 
 ?>

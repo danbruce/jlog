@@ -18,12 +18,12 @@ class JLogMySQLTransaction extends JLogTransaction
             $this->_constructPDO($details);
             parent::__construct($this->_generateNewID());
             $this->_writePtr = 0;
-        } catch (JSONException $e) {
+        } catch (JLogException $e) {
             throw $e;
         }
     }
 
-    public function write()
+    public function write($final = false)
     {
         try {
             if (!isset($this->_transactionDatabaseID)) {
@@ -31,6 +31,10 @@ class JLogMySQLTransaction extends JLogTransaction
             }
 
             $this->_insertMessages();
+
+            if ($final) {
+                $this->_destroyPDO();
+            }
         } catch (Exception $e) {
             throw $e;
         }
@@ -47,13 +51,18 @@ class JLogMySQLTransaction extends JLogTransaction
             $pdoString .= 'host='.$host;
             $this->_pdo = new PDO($pdoString, $username, $password);
             if (!$this->_pdo) {
-                throw new JSONException(
+                throw new JLogException(
                     'Unable to initialize PDO object.'
                 );
             }
         } catch (Exception $e) {
             throw new JLogException($e->getMessage());  
         }
+    }
+
+    private function _destroyPDO()
+    {
+        $this->_pdo = null;
     }
 
     private function _generateNewID()
@@ -207,11 +216,9 @@ class JLogMySQLTransaction extends JLogTransaction
             );
         }
 
-        $logSize = count($this->log);
-
-        while($this->_writePtr < $logSize) {
+        $logCount = count($this->log);
+        while($this->_writePtr < $logCount) {
             $message = $this->log[$this->_writePtr];
-
             $messageString = $message->__toString();
             $success = $this->_insertMessageStatement->bindParam(
                 ':message',

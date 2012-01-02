@@ -58,7 +58,10 @@ class JLogger
                     }                                                                                                        
                 }                                                                                                            
                 if (count($transactionGroup)) {                                                                              
-                    array_push(JLogger::$_currentTransaction, $transactionGroup);                                            
+                    array_push(
+                        JLogger::$_currentTransaction,
+                        $transactionGroup
+                    );                                            
                 }                                                                                                            
             }                                                                                                                
                                                                                                                              
@@ -89,6 +92,8 @@ class JLogger
                     // we caught an error with one of the storage
                     // methods in this group so we jump to the next
                     // group
+                    $trans->functioning = false;
+                    JLogger::error($e);
                     continue;
                 }
             }
@@ -125,7 +130,7 @@ class JLogger
                 // each of the storage methods listed in the group
                 try {
                     foreach ($group as $trans) {
-                        $trans->write();
+                        $trans->write(true);
                     }
                     // if we managed to write to every storage
                     // without catching an exception then we're done

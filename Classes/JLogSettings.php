@@ -17,18 +17,16 @@ class JLogSettings
             ),
             array(
                 'storage' => 'file',
-                'rootFolder' => '/home/danny/src/jlog/log'
-            )
-        ),
-        // second group
-        array(
+                'rootFolder' => '/tmp/jlog'
+            ),
             array(
                 'storage' => 'email',
                 'to' => 'dbruce1126@gmail.com',
-                'from' => 'jlog@domain.com'
+                'from' => 'rnd@mediamiser.com',
+                'subject' => 'JLog Message'
             )
         ),
-        // third group
+        // final group
         array(
             array(
                 'storage' => 'stderr'
