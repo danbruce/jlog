@@ -83,6 +83,8 @@ class JLogger
                 // each of the storage methods listed in the group
                 try {
                     foreach ($group as $trans) {
+                        if (!$trans->functioning) continue;
+
                         $trans->log($ob, $l);
                     }
                     // if we managed to write to every storage
@@ -130,6 +132,8 @@ class JLogger
                 // each of the storage methods listed in the group
                 try {
                     foreach ($group as $trans) {
+                        if (!$trans->functioning) continue;
+                        
                         $trans->write(true);
                     }
                     // if we managed to write to every storage
