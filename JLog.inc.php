@@ -10,6 +10,7 @@ require_once 'Classes/JLogStdErrTransaction.php';
 require_once 'Classes/JLogStdOutTransaction.php';
 require_once 'Classes/JLogFileTransaction.php';
 require_once 'Classes/JLogMySQLTransaction.php';
+require_once 'Classes/JLogSocketTransaction.php';
 require_once 'Classes/JLogEmailTransaction.php';
 require_once 'Classes/JLogger.php';
 
