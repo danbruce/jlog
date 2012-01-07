@@ -16,6 +16,8 @@ class JLogger
                 );
             }
 
+            JLogSettings::readSettingsFile(JLogSettings::$defaultSettingsFile);
+            
             JLogger::$_currentTransaction = array();
             foreach (JLogSettings::$groups as $group) {
                 $transactionGroup = array();
