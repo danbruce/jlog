@@ -35,14 +35,20 @@ class JLogSettingsParser
 
     public function parse($data)
     {
-        xml_parse($this->_parser, $data);
+        if (0 == xml_parse($this->_parser, $data)) {
+            die('Error parsing XML: '.
+                xml_error_string(
+                    xml_get_error_code($this->_parser)
+                )
+            );
+        }
     }
 
     public function beginElement($parser, $tag, $attributes)
     {
         $tag = strtolower(trim($tag));
 
-        if (0 == strcmp($tag,'settings')) {
+        if (0 == strcmp($tag, 'settings')) {
             if(true === $this->_foundRootFolder) {
                 throw new JLogException(
                     'Found a second settings tag.'
