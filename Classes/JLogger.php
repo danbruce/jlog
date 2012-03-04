@@ -1,11 +1,25 @@
 <?php
+/**
+ * @file Classes/JLogger.php
+ * @brief Implemention of the JLogger class.
+ */
 
-class JLogger
+/**
+ * @class JLogger
+ * @brief Main logging class. The main static functions used for logging are in
+ * this class.
+ */
+abstract class JLogger
 {
+    // singleton reference to the current transaction
     private static $_currentTransaction = null;
-    private static $_written = false;
 
-    public static function init($options = null)
+    /**
+     * Initializes the logging system.
+     * @return void
+     * @throws JLogException Throws an exception if something went wrong.
+     */
+    public static function init()
     {
         try {
 
@@ -88,6 +102,14 @@ class JLogger
         }
     }
 
+    /**
+     * Writes the first parameter to the log.
+     * @param mixed $ob An object to be logged.
+     * @param int $l An optional parameter indicating the logging level of the
+     * the object. Defaults to JLogMessage::WARNING.
+     * @return void
+     * @throws JLogException Throws an exception if something went wrong.
+     */
     public static function log($ob, $l = JLogMessage::WARNING)
     {
         try {
@@ -117,26 +139,52 @@ class JLogger
         }
     }
 
+    /** 
+     * Logs the object $ob with the logging level JLogMessage::FATAL
+     * @param mixed $ob An object to be logged.
+     * @return void
+     */
     public static function fatal($ob)
     {
         JLogger::log($ob, JLogMessage::FATAL);
     }
 
+    /** 
+     * Logs the object $ob with the logging level JLogMessage::ERROR
+     * @param mixed $ob An object to be logged.
+     * @return void
+     */
     public static function error($ob)
     {
         JLogger::log($ob, JLogMessage::ERROR);
     }
 
+    /** 
+     * Logs the object $ob with the logging level JLogMessage::WARNING
+     * @param mixed $ob An object to be logged.
+     * @return void
+     */
     public static function warning($ob)
     {
         JLogger::log($ob, JLogMessage::WARNING);
     }
 
+    /** 
+     * Logs the object $ob with the logging level JLogMessage::NOTICE
+     * @param mixed $ob An object to be logged.
+     * @return void
+     */
     public static function notice($ob)
     {
         JLogger::log($ob, JLogMessage::NOTICE);
     }
 
+    /**
+     * Clean shutdown of the logging system. Ensures all transactions are fully
+     * written to their output sinks.
+     * @return void
+     * @throws JLogException Throws an exception if something went wrong
+     */
     public static function close()
     {
         try {
@@ -164,10 +212,14 @@ class JLogger
         }
     }
 
+    /**
+     * Convenience method for exiting the script with an error string.
+     * @param string $msg The error message
+     * @return void
+     */
     public static function dieWithError($msg)
     {
         die('Caught exception with message: '.$msg."\n");
-        exit();
     }
 }
 

@@ -1,18 +1,36 @@
 <?php
+/**
+ * @file Classes/JLogSettings.php
+ * @brief Implemention of the JLogSettings class.
+ */
 
+/**
+ * @class JLogSettings
+ * @brief Holds the global settings parsed from the XML settings file.
+ */
 class JLogSettings
 {
-    public static $defaultSettingsFile = '../local/JLogSettings.xml';
+    /** A path to the default settings file. */
+    public static $defaultSettingsFile = 'JLogSettings.xml';
 
+    /** A flag to indicate whether we should write to the log immediately or to
+        let the logged objects be buffered. */
     public static $WriteImmediately = true;
 
+    /** The various transaction groups we read from the settings file. */
     public static $groups;
 
-    private static $_currentTag;
-
+    /**
+     * Initializes the settings by reading from the specified file.
+     * @param string $file The file to be parsed.
+     * @return void
+     * @throws JLogException throws an exception if something went wrong with
+     * the parsing.
+     */
     public static function readSettingsFile($file)
     {
         try {
+            // get the full path to the file
             $file = realpath($file);
 
             if (false === file_exists($file)) {
@@ -38,6 +56,11 @@ class JLogSettings
             throw $e;
         }
     }
+
+    /*
+     ***************************************************
+     * I suspect these functions are no longer needed. *
+     ***************************************************
 
     private static function _parseXMLSettings($xml)
     {
@@ -75,6 +98,7 @@ class JLogSettings
         print_r($newStorage); echo "\n\n";
         return $newStorage;
     }
+    */
 }
 
 ?>

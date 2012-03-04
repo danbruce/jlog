@@ -1,20 +1,36 @@
 <?php
+/**
+ * @file Classes/JLogSettingsParser.php
+ * @brief Implemention of the JLogSettingsParser class.
+ */
 
+/**
+ * @class JLogSettingsParser
+ * @brief An XML parser for reading in JLogSettings.
+ */
 class JLogSettingsParser
 {
+    // the PHP xml_parser 
     private $_parser;
+    // the current array of groups
     private $_groupArray;
 
+    // various tags used within the xml parsing
     private $_foundRootFolder;
     private $_currentTag;
     private $_currentGroup;
     private $_currentStorage;
     private $_currentAttribute;
 
+    /**
+     * Constructor for this class. This class should only be used by the
+     * JLogSettings class for reading in the XML settings.
+     */
     public function __construct()
     {
         $this->_groupArray = array();
         $this->_foundRootFolder = false;
+        // setup the xml parser
         $this->_parser = xml_parser_create();
         xml_set_object($this->_parser, $this);
         xml_set_element_handler(
@@ -28,11 +44,20 @@ class JLogSettingsParser
         );
     }
 
+    /**
+     * Returns the list of transaction groups that were parsed from the XML
+     * @return array The array of transaction groups.
+     */
     public function getGroups()
     {
         return $this->_groupArray;
     }
 
+    /** 
+     * Begins parsing the data.
+     * @param string $data The XML data to be parsed.
+     * @return void
+     */
     public function parse($data)
     {
         if (0 == xml_parse($this->_parser, $data)) {
@@ -44,6 +69,9 @@ class JLogSettingsParser
         }
     }
 
+    /**
+     * Callback when an XML tag is opened. Should only be called by PHP.
+     */
     public function beginElement($parser, $tag, $attributes)
     {
         $tag = strtolower(trim($tag));
@@ -87,6 +115,9 @@ class JLogSettingsParser
         }
     }
 
+    /**
+     * Callback when an XML tag is closed. Should only be called by PHP.
+     */
     public function endElement($parser, $tag)
     {
         $tag = strtolower(trim($tag));
@@ -111,6 +142,9 @@ class JLogSettingsParser
         }
     }
 
+    /**
+     * Callback when CDATA is encountered. Should only be called by PHP.
+     */
     public function characters($parser, $cdata)
     {
         $cdata = trim($cdata);
