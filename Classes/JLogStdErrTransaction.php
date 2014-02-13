@@ -22,6 +22,15 @@ class JLogStdErrTransaction extends JLogStreamTransaction
             throw $e;
         }
     }
+
+    public function write($final = false)
+    {
+        $logCount = count($this->log);
+        while ($this->_writePtr < $logCount) {
+            $toWrite = $this->log[$this->_writePtr++]->__toString();
+            error_log($toWrite);
+        }
+    }
 }
 
 ?>

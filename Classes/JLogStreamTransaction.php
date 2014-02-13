@@ -13,7 +13,7 @@ abstract class JLogStreamTransaction extends JLogTransaction
     // the current stream
     private $_stream = null;
     // the pointer to the last object we wrote from the log
-    private $_writePtr;
+    protected $_writePtr;
 
     /**
      * Constructor for the class.

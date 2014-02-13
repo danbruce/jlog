@@ -19,18 +19,11 @@ abstract class JLogger
      * @return void
      * @throws JLogException Throws an exception if something went wrong.
      */
-    public static function init()
+    public static function init($settingsFile = false)
     {
         try {
-
-            // enforce a singleton on the current transaction
-            if (isset(JLogger::$_currentTransaction)) {
-                throw new JLogException(
-                    'JLogger::init called more than once.'
-                );
-            }
-
-            JLogSettings::readSettingsFile(JLogSettings::$defaultSettingsFile);
+            if (false == $settingsFile) $settingsFile = JLogSettings::$defaultSettingsFile;
+            JLogSettings::readSettingsFile($settingsFile);
 
             JLogger::$_currentTransaction = array();
             foreach (JLogSettings::$groups as $group) {

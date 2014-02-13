@@ -1,0 +1,18 @@
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/3.7/phpunit.xsd"
+    bootstrap="./Tests/bootstrap.php" colors="true" strict="true">
+    <testsuites>
+        <testsuite name="All Tests">
+            <directory>./Tests</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./Classes</directory>
+            <file>./JLog.inc.php</file>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="./Tests/report" charset="UTF-8" highlight="true"/>
+    </logging>
+</phpunit>
