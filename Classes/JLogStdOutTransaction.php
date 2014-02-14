@@ -8,7 +8,8 @@
  * @class JLogStdOutTransaction
  * @brief A transaction for logging to the standard output stream.
  */
-class JLogStdOutTransaction extends JLogStreamTransaction
+class JLogStdOutTransaction
+    extends JLogStreamTransaction
 {
     /**
      * Constructor for the class.
@@ -16,11 +17,7 @@ class JLogStdOutTransaction extends JLogStreamTransaction
      */
     public function __construct()
     {
-        try {
-            parent::__construct('STDOUT');
-        } catch (JLogException $e) {
-            throw $e;
-        }
+        parent::__construct('STDOUT');
     }
 
     public function write($final = false)

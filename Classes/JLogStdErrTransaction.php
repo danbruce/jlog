@@ -8,7 +8,8 @@
  * @class JLogStdErrTransaction
  * @brief A transaction for logging to the standard error stream.
  */
-class JLogStdErrTransaction extends JLogStreamTransaction
+class JLogStdErrTransaction
+    extends JLogStreamTransaction
 {
     /**
      * Constructor for the class.
@@ -16,11 +17,7 @@ class JLogStdErrTransaction extends JLogStreamTransaction
      */
     public function __construct()
     {
-        try {
-            parent::__construct('STDERR');
-        } catch (JLogException $e) {
-            throw $e;
-        }
+        parent::__construct('STDERR');
     }
 
     public function write($final = false)

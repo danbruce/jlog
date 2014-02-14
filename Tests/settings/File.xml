@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <group>
+        <storage type="file">
+            <attribute>
+                <name>rootFolder</name>
+                <value>./Tests/report/fileTest</value>
+            </attribute>
+        </storage>
+    </group>
+</settings>

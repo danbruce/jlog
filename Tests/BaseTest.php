@@ -16,6 +16,12 @@ abstract class BaseTest
         );
     }
 
+    public function tearDown()
+    {
+        parent::tearDown();
+        JLogger::close();
+    }
+
     protected function _assertMessageMatches($expected, $message, $transactionType)
     {
         $this->assertEquals($transactionType, $message['transaction']);

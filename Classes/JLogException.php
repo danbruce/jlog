@@ -11,15 +11,6 @@
  */
 class JLogException extends Exception
 {
-    /**
-     * Converts this exception to a string by using PHP's standard exception
-     * string.
-     * @return string This exception in string representation.
-     */
-    public function __toString()
-    {
-        return parent::__toString();
-    }
 }
 
 ?>

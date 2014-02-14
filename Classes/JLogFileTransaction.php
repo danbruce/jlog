@@ -24,16 +24,12 @@ class JLogFileTransaction extends JLogTransaction
      */
     public function __construct($details)
     {
-        try {
-            // generate a new transaction id and pass it to the parent class
-            parent::__construct(
-                $this->_generateNewID(
-                    $details
-                )
-            );
-        } catch (JLogException $e) {
-            throw $e;
-        }
+        // generate a new transaction id and pass it to the parent class
+        parent::__construct(
+            $this->_generateNewID(
+                $details
+            )
+        );
     }
 
     // generates the id and ensures the file can be written to
