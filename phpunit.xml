@@ -8,9 +8,11 @@
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./Classes</directory>
-            <file>./JLog.inc.php</file>
+            <directory suffix=".php">./JLog</directory>
         </whitelist>
+        <blacklist>
+
+        </blacklist>
     </filter>
     <logging>
         <log type="coverage-html" target="./Tests/report" charset="UTF-8" highlight="true"/>

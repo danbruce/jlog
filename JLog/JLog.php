@@ -22,9 +22,12 @@ class Jlog
     // contains a pointer to the current transaction
     private $_currentTransaction;
 
-    private static final $_defaultSettings = array(
+    // the main instance
+    private static $_instance;
+
+    private static $_defaultSettings = array(
         'buffering' => false,
-        'verbosity' => Message::LEVEL_DEBUG
+        'verbosity' => Message::LEVEL_DEBUG,
         'groups' => array(
             array(
                 array('type' => 'stdout')
@@ -33,28 +36,42 @@ class Jlog
     );
 
     /**
+        Initializes the JLog instance.
+        @throws JLog\Exception Throws an exception if something went wrong.
+     */
+    public function __construct(array $settings)
+    {
+        // $this->_currentTransaction = new Transaction($settings);
+    }
+
+    private function _logItem(mixed $item, $level)
+    {
+        $this->_currentTransaction->log($item, $level);
+    }
+
+    /**
         Initializes the logging system.
         @return void
         @throws JLog\Exception Throws an exception if something went wrong.
      */
-    public static function init($settings)
+    public static function init($settings = array())
     {
         if (is_array($settings)) {
-            $settings = $this->_applySettingsFromArray($settings);
+            $settings = self::_applySettingsFromArray($settings);
         } else if (is_string($settings)) {
-            $settings = $this->_applySettingsFromFilePath($settings);
+            $settings = self::_applySettingsFromFilePath($settings);
         }
-        $this->_currentTransaction = new Transaction($settings);
+        self::$_instance = new self($settings);
     }
 
     // applies the settings from an array
-    private function _applySettingsFromArray(array $settings)
+    private static function _applySettingsFromArray(array $settings)
     {
         return array_merge_recursive(self::$_defaultSettings, $settings);
     }
 
     // applies the settings from a file path
-    private function _applySettingsFromFilePath(string $filePath)
+    private static function _applySettingsFromFilePath(string $filePath)
     {
         $settings = json_decode(file_get_contents($filePath), true);
         return is_array($settings) ? $settings : array();
@@ -70,7 +87,11 @@ class Jlog
      */
     public static function log(mixed $item, $level = Message::LEVEL_WARNING)
     {
+        if (!isset(self::$_instance)) {
+            throw new Exception('JLog must be initialized with a call to JLog::init()');
+        }
 
+        self::$_instance->_log($item, $level);
     }
 
     /** 

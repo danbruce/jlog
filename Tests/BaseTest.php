@@ -1,7 +1,9 @@
 <?php
 
+namespace Tests;
+
 abstract class BaseTest
-    extends PHPUnit_Framework_TestCase
+    extends \PHPUnit_Framework_TestCase
 {
     public function baseProvider()
     {
@@ -16,10 +18,16 @@ abstract class BaseTest
         );
     }
 
+    public function setUp()
+    {
+        parent::setUp();
+        \JLog\JLog::init();
+    }
+
     public function tearDown()
     {
         parent::tearDown();
-        JLogger::close();
+        \JLog\JLog::flush();
     }
 
     protected function _assertMessageMatches($expected, $message, $transactionType)
