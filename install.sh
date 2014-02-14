@@ -9,7 +9,6 @@ pear config-set auto_discover 1
 pear install pear.phpunit.de/PHPUnit
 pear install phpunit/DbUnit
 mysql -u root -ppassword -e "CREATE DATABASE jlog_test"
-mysql -u root -ppassword jlog_test < 
 sed "s/\${TABLE_PREFIX}/testing_/g" /vagrant/Storage/mysql/structure.sql > temp.sql
 mysql -u root -ppassword jlog_test < temp.sql
 rm temp.sql
