@@ -4,7 +4,7 @@ apt-add-repository -y ppa:ondrej/mysql
 apt-get -y update
 apt-get -y dist-upgrade
 apt-get -y autoremove
-apt-get install php5-cli php5-mysql php5-curl php5-xdebug php-pear mysql-server mysql-client
+apt-get install php5-cli php5-mysql php5-curl php5-xdebug php-pear mysql-server mysql-client doxygen
 pear config-set auto_discover 1
 pear install pear.phpunit.de/PHPUnit
 pear install phpunit/DbUnit

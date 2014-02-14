@@ -26,32 +26,16 @@ class JLogSocketTransaction extends JLogTransaction
      */
     public function __construct($details)
     {
-        try {
-            // make sure details array is all valid
-            if (!isset($details) || !is_array($details)) {
-                throw new JLogException(
-                    'Invalid details for socket transaction'
-                );
-            }
-            if (!isset($details['host'])) {
-                throw new JLogException(
-                    'Missing host for socket transaction'
-                );
-            }
-            if (!isset($details['port'])) {
-                throw new JLogException(
-                    'Missing port for socket transaction'
-                );
-            }
-
-            parent::__construct('socket');
-            // setup the local variables
-            $this->_host = $details['host'];
-            $this->_port = intval($details['port']);
-            $this->_writePtr = 0;
-        } catch (JLogException $e) {
-            throw $e;
+        extract($details, EXTR_OVERWRITE);
+        if (!isset($host) || !isset($port)) {
+            throw new JLogException('Invalid settings for socket logging.');
         }
+
+        parent::__construct('socket');
+        // setup the local variables
+        $this->_host = $host;
+        $this->_port = intval($port);
+        $this->_writePtr = 0;
     }
 
     /**

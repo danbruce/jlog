@@ -33,15 +33,11 @@ class JLogMySQLTransaction extends JLogTransaction
      */
     public function __construct($details)
     {
-        try {
-            // setup the PDO object
-            $this->_constructPDO($details);
-            // generate a new transaction ID and pass it to the parent class
-            parent::__construct($this->_generateNewID());
-            $this->_writePtr = 0;
-        } catch (JLogException $e) {
-            throw $e;
-        }
+        // setup the PDO object
+        $this->_constructPDO($details);
+        // generate a new transaction ID and pass it to the parent class
+        parent::__construct($this->_generateNewID());
+        $this->_writePtr = 0;
     }
 
     /**
@@ -53,45 +49,38 @@ class JLogMySQLTransaction extends JLogTransaction
      */
     public function write($final = false)
     {
-        try {
-            // if we don't yet have a transaction database ID, we need to
-            // insert the transaction into the database
-            if (!isset($this->_transactionDatabaseID)) {
-                $this->_transactionDatabaseID = $this->_insertTransaction();
-            }
+        // if we don't yet have a transaction database ID, we need to
+        // insert the transaction into the database
+        if (!isset($this->_transactionDatabaseID)) {
+            $this->_transactionDatabaseID = $this->_insertTransaction();
+        }
 
-            // write the unlogged messages to the database
-            $this->_insertMessages();
+        // write the unlogged messages to the database
+        $this->_insertMessages();
 
-            // if this is the final write, close the connection to the database
-            if ($final) {
-                $this->_destroyPDO();
-            }
-        } catch (JLogException $e) {
-            throw $e;
+        // if this is the final write, close the connection to the database
+        if ($final) {
+            $this->_destroyPDO();
         }
     }
 
     // creates the PDO object we will use to write to the database
     private function _constructPDO($details)
     {
-        try {
-            extract($details, EXTR_OVERWRITE);
-            if (isset($tablePrefix)) {
-                $this->_tablePrefix = $tablePrefix;
-            }
-            $pdoString  = 'mysql:dbname='.$database.';';
-            $pdoString .= 'host='.$host;
-            $this->_pdo = new PDO($pdoString, $username, $password);
-            if (!$this->_pdo) {
-                throw new JLogException(
-                    'Unable to initialize PDO object.'
-                );
-            }
-        } catch (Exception $e) {
-            // we catch any exception and convert it to a JLogException
-            throw new JLogException($e->getMessage());  
+        extract($details, EXTR_OVERWRITE);
+        if (isset($tablePrefix)) {
+            $this->_tablePrefix = $tablePrefix;
         }
+        $pdoString  = 'mysql:dbname='.$database.';';
+        $pdoString .= 'host='.$host;
+        $this->_pdo = new PDO($pdoString, $username, $password);
+        if (!$this->_pdo) {
+// @codeCoverageIgnoreStart
+            throw new JLogException(
+                'Unable to initialize PDO object.'
+            );
+        }
+// @codeCoverageIgnoreEnd
     }
 
     // clears the current pdo object
@@ -103,73 +92,56 @@ class JLogMySQLTransaction extends JLogTransaction
     // generates a unique transaction ID
     private function _generateNewID()
     {
-        try {
-            // we need to prepare the query that checks for a unique ID
-            if ($this->_prepareLookupStatement()) {
-                $rowCount = 1;
-                // loop until we find a unique id
-                do {
-                    // generate a hashed ID
-                    $trans_id = hash('sha256', uniqid('', true));
-                    // bind the parameters to the query
-                    $success = $this->_lookupUniqueIDStatement->bindParam(
-                        ':transID',
-                        $trans_id,
-                        PDO::PARAM_STR,
-                        strlen($trans_id)
-                    );
-                    // if binding was successful
-                    if ($success) {
-                        // execute the query
-                        if (!$this->_lookupUniqueIDStatement->execute()) {
-                            throw new JLogException(
-                                'Unable to execute lookup statement.'
-                            );
-                        }
-                        // count how many rows matched this unique ID
-                        $rowCount = $this->_lookupUniqueIDStatement->rowCount();
-                    }
-                } while ($rowCount > 0);
-                return $trans_id;
-            } else {
-                throw new JLogException(
-                    'Unable to prepare unique ID lookup statement.'
+        // we need to prepare the query that checks for a unique ID
+        if ($this->_prepareLookupStatement()) {
+            $rowCount = 1;
+            // loop until we find a unique id
+            do {
+                // generate a hashed ID
+                $trans_id = hash('sha256', uniqid('', true));
+                // bind the parameters to the query
+                $success = $this->_lookupUniqueIDStatement->bindParam(
+                    ':transID',
+                    $trans_id,
+                    PDO::PARAM_STR,
+                    strlen($trans_id)
                 );
-            }
-        } catch (Exception $e) {
-            throw new JLogException($e->getMessage());
+                // if binding was successful
+                if ($success) {
+                    // execute the query
+                    if (!$this->_lookupUniqueIDStatement->execute()) {
+// @codeCoverageIgnoreStart
+                        throw new JLogException(
+                            'Unable to execute lookup statement.'
+                        );
+                    }
+// @codeCoverageIgnoreEnd
+                    // count how many rows matched this unique ID
+                    $rowCount = $this->_lookupUniqueIDStatement->rowCount();
+                }
+            } while ($rowCount > 0);
+            return $trans_id;
+        } else {
+// @codeCoverageIgnoreStart
+            throw new JLogException(
+                'Unable to prepare unique ID lookup statement.'
+            );
         }
+// @codeCoverageIgnoreEnd
     }
 
     // a generic function for preparing all of the above statements
     private function _prepareGenericStatement($statementName, $query)
     {
-        // if the statement is already prepared, we return true
-        if ($this->$statementName) {
-            return true;
-        }
-
-        try {
-            // prepare the statement
-            $this->$statementName = $this->_pdo->prepare($query);
-            // and return the success
-            if ($this->$statementName) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception $e) {
-            return false;
-        }
+        // prepare the statement
+        $this->$statementName = $this->_pdo->prepare($query);
+        return ($this->$statementName) ? true : false;
     }
     
     // prepares the lookup statement for finding unique transaction IDs
     private function _prepareLookupStatement()
     {
         $stmtName = '_lookupUniqueIDStatement';
-        if ($this->$stmtName) {
-            return true;
-        }
 
         $prefix = $this->_tablePrefix;
         $queryString  = 'SELECT `'.$prefix.'Transactions`.`id` ';
@@ -188,9 +160,6 @@ class JLogMySQLTransaction extends JLogTransaction
     private function _prepareTransactionInsertStatement()
     {
         $stmtName = '_insertTransactionStatement';
-        if ($this->$stmtName) {
-            return true;
-        }
 
         $prefix = $this->_tablePrefix;
         $queryString  = 'INSERT INTO `'.$prefix.'Transactions` ';
@@ -248,10 +217,12 @@ class JLogMySQLTransaction extends JLogTransaction
     {
         // check if the statement for inserting transactions has been prepared
         if (!$this->_prepareTransactionInsertStatement()) {
+// @codeCoverageIgnoreStart
             throw new JLogException(
                 'Unable to prepare transaction insert statement.'
             );
         }
+// @codeCoverageIgnoreEnd
 
         // bind the params
         $success = $this->_insertTransactionStatement->bindParam(
@@ -263,16 +234,20 @@ class JLogMySQLTransaction extends JLogTransaction
 
         // if we failed to bind the params throw an exception
         if (!$success) {
+// @codeCoverageIgnoreStart
             throw new JLogException(
                 'Unable to bind params to insert transaction query.'
                 );
         }
+// @codeCoverageIgnoreEnd
         // execute the actual insertion
         if (!$this->_insertTransactionStatement->execute()) {
+// @codeCoverageIgnoreStart
             throw new JLogException(
                 'Unable to execute insert transaction query.'
             );
         }
+// @codeCoverageIgnoreEnd
 
         // return the PDO classes last insert ID as the new transaction
         // database ID
@@ -284,10 +259,12 @@ class JLogMySQLTransaction extends JLogTransaction
     {
         // check if the statement for inserting messages has been prepared
         if (!$this->_prepareMessageInsertStatement()) {
+// @codeCoverageIgnoreStart
             throw new JLogException(
                 'Unable to prepare message insert statement.'
             );
         }
+// @codeCoverageIgnoreEnd
 
         // bind the params
         $success = $this->_insertMessageStatement->bindParam(
@@ -298,10 +275,12 @@ class JLogMySQLTransaction extends JLogTransaction
 
         // if we failed to bind the params throw an exception
         if (!$success) {
+// @codeCoverageIgnoreStart
             throw new JLogException(
                 'Unable to bind :transID param to message insert statement'
             );
         }
+// @codeCoverageIgnoreEnd
 
         // count how many elements are in this log
         $logCount = count($this->log);
@@ -321,16 +300,20 @@ class JLogMySQLTransaction extends JLogTransaction
             );
             // if we failed to bind the params throw an exception
             if (!$success) {
+// @codeCoverageIgnoreStart
                 throw new JLogException(
                     'Unable to bind :message param to message insert statement'
                 );
             }
+// @codeCoverageIgnoreEnd
             // perform the actual insertion
             if (!$this->_insertMessageStatement->execute()) {
+// @codeCoverageIgnoreStart
                 throw new JLogException(
                     'Unable to execute insert message statement'
                 );
             }
+// @codeCoverageIgnoreEnd
             // increment the write pointer
             $this->_writePtr++;
         }
@@ -342,10 +325,8 @@ class JLogMySQLTransaction extends JLogTransaction
     // transaction to NOW()
     private function _updateTransactionModifyDate()
     {
-        // prepare the statement if it hasn't been done already
-        if (!isset($this->_updateTransactionModifyDateStatement)) {
-            $this->_prepareUpdateTransactionModifyDateStatement();
-        }
+        // prepare the statement
+        $this->_prepareUpdateTransactionModifyDateStatement();
 
         // bind the params
         $success = $this->_updateTransactionModifyDateStatement->bindParam(
@@ -355,17 +336,21 @@ class JLogMySQLTransaction extends JLogTransaction
         );
         // if the params failed to bind throw an exception
         if (!$success) {
+// @codeCoverageIgnoreStart
             throw new JLogException(
                 'Unable to bind :transID param to transaction modify date update statement'
             );
         }
+// @codeCoverageIgnoreEnd
 
         // execute the update query
         if (!$this->_updateTransactionModifyDateStatement->execute()) {
+// @codeCoverageIgnoreStart            
             throw new JLogException(
                 'Unable to execute transaction modify date update statement'
             );
         }
+// @codeCoverageIgnoreEnd
     }
 }
 

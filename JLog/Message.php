@@ -1,28 +1,30 @@
 <?php
 /**
- * @file Classes/JLogMessage.php
- * @brief Implemention of the JLogMessage class.
+ * @file JLog/Message.php
+ * @brief Implemention of the JLog\Message class.
  */
 
+namespace JLog;
+
 /**
- * @class JLogMessage
+ * @class Message
  * @brief An individual message to be logged.
  * @details Each time an object is logged, we wrap that object inside a
  * JLogMessage. Additional environment information is capture by this class and
  * included with the original object to be logged.
  */
-class JLogMessage
+class Message
 {
     /** A logging level indicating a fatal error has occurred. */
-    const FATAL   = 0;
+    const LEVEL_FATAL   = 0;
     /** A logging level indicating an error has occurred. */
-    const ERROR   = -10;
+    const LEVEL_ERROR   = -10;
     /** A logging level indicating a warning has been raised. */
-    const WARNING = -20;
+    const LEVEL_WARNING = -20;
     /** A logging level representing a notice. */
-    const NOTICE  = -30;
+    const LEVEL_NOTICE  = -30;
     /** A logging level for debugging purposes. */
-    const DEBUG = -40;
+    const LEVEL_DEBUG = -40;
 
     /** The transaction ID associated with this message. */
     public $transaction;

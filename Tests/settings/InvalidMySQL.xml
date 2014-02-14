@@ -16,11 +16,7 @@
             </attribute>
             <attribute>
                 <name>password</name>
-                <value>password</value>
-            </attribute>
-            <attribute>
-                <name>tablePrefix</name>
-                <value>testing_</value>
+                <value>invalid password</value>
             </attribute>
         </storage>
     </group>

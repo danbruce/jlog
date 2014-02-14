@@ -18,6 +18,13 @@ class MySQLTest
                     'level' => -20,
                     'contents' => 'Test message'
                 )
+            ),
+            array(
+                array('a', 'b', 'c'),
+                array(
+                    'level' => -20,
+                    'contents' => array('a', 'b', 'c')
+                )
             )
         );
     }
@@ -58,11 +65,20 @@ class MySQLTest
      */
     public function testBasicUsage($input, $expected)
     {
-        $this->assertEquals(0, $this->getConnection()->getRowCount('Transactions'));
-        $this->assertEquals(0, $this->getConnection()->getRowCount('Messages'));
+        $this->assertEquals(0, $this->getConnection()->getRowCount('testing_Transactions'));
+        $this->assertEquals(0, $this->getConnection()->getRowCount('testing_Messages'));
         JLogger::log($input);
-        $this->assertEquals(1, $this->getConnection()->getRowCount('Transactions'));
-        $this->assertEquals(1, $this->getConnection()->getRowCount('Messages'));
-        
+        JLogger::log($input);
+        JLogger::close();
+        $this->assertEquals(1, $this->getConnection()->getRowCount('testing_Transactions'));
+        $this->assertEquals(2, $this->getConnection()->getRowCount('testing_Messages'));
+    }
+
+    /**
+     * @expectedException PDOException
+     */
+    public function testBrokenConfig()
+    {
+        JLogger::init('./Tests/settings/InvalidMySQL.xml');
     }
 }

@@ -21,77 +21,70 @@ abstract class JLogger
      */
     public static function init($settingsFile = false)
     {
-        try {
-            if (false == $settingsFile) $settingsFile = JLogSettings::$defaultSettingsFile;
-            JLogSettings::readSettingsFile($settingsFile);
+        if (false == $settingsFile) $settingsFile = JLogSettings::$defaultSettingsFile;
+        JLogSettings::readSettingsFile($settingsFile);
 
-            JLogger::$_currentTransaction = array();
-            foreach (JLogSettings::$groups as $group) {
-                $transactionGroup = array();
-                foreach ($group as $storage) {
-                    if (is_array($storage) && isset($storage['storage'])) {
-                        try {
-                            switch ($storage['storage']) {
-                                case 'stderr' :
-                                    array_push(
-                                        $transactionGroup,
-                                        new JLogStdErrTransaction($storage)
-                                    );
-                                    break;
-                                case 'stdout' :
-                                    array_push(
-                                        $transactionGroup,
-                                        new JLogStdOutTransaction($storage)
-                                    );
-                                    break;
-                                case 'email' :
-                                    array_push(
-                                        $transactionGroup,
-                                        new JLogEmailTransaction($storage)
-                                    );
-                                    break;
-                                case 'mysql' :
-                                    array_push(
-                                        $transactionGroup,
-                                        new JLogMySQLTransaction($storage)
-                                    );
-                                    break;
-                                case 'file' :
-                                    array_push(
-                                        $transactionGroup,
-                                        new JLogFileTransaction($storage)
-                                    );
-                                    break;
-                                case 'socket' :
-                                    array_push(
-                                        $transactionGroup,
-                                        new JLogSocketTransaction($storage)
-                                    );
-                                default :
-                                    throw new JLogException(
-                                        'Unknown JLog storage method '.$storage
-                                    );
-                            }
-                        } catch (JLogException $e) {
-                            continue;
-                        }
+        JLogger::$_currentTransaction = array();
+        foreach (JLogSettings::$groups as $group) {
+            $transactionGroup = array();
+            foreach ($group as $storage) {
+                if (is_array($storage) && isset($storage['storage'])) {
+                    switch ($storage['storage']) {
+                        case 'stderr' :
+                            array_push(
+                                $transactionGroup,
+                                new JLogStdErrTransaction($storage)
+                            );
+                            break;
+                        case 'stdout' :
+                            array_push(
+                                $transactionGroup,
+                                new JLogStdOutTransaction($storage)
+                            );
+                            break;
+                        case 'email' :
+                            array_push(
+                                $transactionGroup,
+                                new JLogEmailTransaction($storage)
+                            );
+                            break;
+                        case 'mysql' :
+                            array_push(
+                                $transactionGroup,
+                                new JLogMySQLTransaction($storage)
+                            );
+                            break;
+                        case 'file' :
+                            array_push(
+                                $transactionGroup,
+                                new JLogFileTransaction($storage)
+                            );
+                            break;
+                        case 'socket' :
+                            array_push(
+                                $transactionGroup,
+                                new JLogSocketTransaction($storage)
+                            );
+                            break;
+                        default :
+                            throw new JLogException(
+                                'Unknown JLog storage method '.$storage
+                            );
                     }
                 }
-                if (count($transactionGroup)) {
-                    array_push(
-                        JLogger::$_currentTransaction,
-                        $transactionGroup
-                    );
-                }
             }
-
-            if (count(JLogger::$_currentTransaction) < 1) {
-                throw new JLogException(
-                    'No working logging mechanism.'
+            if (count($transactionGroup)) {
+                array_push(
+                    JLogger::$_currentTransaction,
+                    $transactionGroup
                 );
             }
-        } catch (JLogException $e) {
-            JLogger::dieWithError($e->getMessage());
+        }
+
+        if (count(JLogger::$_currentTransaction) < 1) {
+            throw new JLogException(
+                'No working logging mechanism.'
+            );
         }
     }
 
