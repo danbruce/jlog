@@ -26,7 +26,7 @@ class Jlog
     private static $_instance;
 
     private static $_defaultSettings = array(
-        'buffering' => false,
+        'buffer' => false,
         'verbosity' => Message::LEVEL_DEBUG,
         'groups' => array(
             array(
@@ -41,10 +41,11 @@ class Jlog
      */
     public function __construct(array $settings)
     {
-        // $this->_currentTransaction = new Transaction($settings);
+        $this->_currentTransaction = new Transaction($settings);
     }
 
-    private function _logItem(mixed $item, $level)
+    // logs the actual item to the transaction
+    private function _log($item, $level)
     {
         $this->_currentTransaction->log($item, $level);
     }
@@ -85,7 +86,7 @@ class Jlog
         @return void
         @throws JLog\Exception Throws an exception if something went wrong.
      */
-    public static function log(mixed $item, $level = Message::LEVEL_WARNING)
+    public static function log($item, $level = Message::LEVEL_WARNING)
     {
         if (!isset(self::$_instance)) {
             throw new Exception('JLog must be initialized with a call to JLog::init()');
@@ -99,7 +100,7 @@ class Jlog
         @param mixed $item An object to be logged.
         @return void
     */
-    public static function fatal(mixed $item)
+    public static function fatal($item)
     {
         self::log($item, Message::LEVEL_FATAL);
     }
@@ -109,7 +110,7 @@ class Jlog
         @param mixed $item An object to be logged.
         @return void
     */
-    public static function error(mixed $item)
+    public static function error($item)
     {
         self::log($item, Message::LEVEL_ERROR);
     }
@@ -119,7 +120,7 @@ class Jlog
         @param mixed $item An object to be logged.
         @return void
     */
-    public static function warning(mixed $item)
+    public static function warning($item)
     {
         self::log($item, Message::LEVEL_WARNING);
     }
@@ -129,7 +130,7 @@ class Jlog
         @param mixed $item An object to be logged.
         @return void
     */
-    public static function notice(mixed $item)
+    public static function notice($item)
     {
         self::log($item, Message::LEVEL_NOTICE);
     }
@@ -139,7 +140,7 @@ class Jlog
         @param mixed $item An object to be logged.
         @return void
     */
-    public static function debug(mixed $item)
+    public static function debug($item)
     {
         self::log($item, Message::LEVEL_DEBUG);
     }

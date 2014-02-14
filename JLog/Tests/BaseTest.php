@@ -11,7 +11,7 @@ abstract class BaseTest
             array(
                 'Test message',
                 array(
-                    'level' => -20,
+                    'level' => \JLog\Message::LEVEL_WARNING,
                     'contents' => 'Test message'
                 )
             )
@@ -30,9 +30,9 @@ abstract class BaseTest
         \JLog\JLog::flush();
     }
 
-    protected function _assertMessageMatches($expected, $message, $transactionType)
+    protected function _assertMessageMatches($expected, $message)
     {
-        $this->assertEquals($transactionType, $message['transaction']);
+        $this->assertTrue(isset($message['transaction']) && strlen($message['transaction']));
         $this->assertEquals($expected['level'], $message['level']);
         $this->assertEquals($expected['contents'], $message['contents']);
     }

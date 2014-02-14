@@ -1,15 +1,31 @@
 <?php
 
-class StdErrorTest
+namespace JLog\Tests\Storage;
+
+use JLog\Tests\BaseTest,
+    JLog\JLog;
+
+class StdErrTest
     extends BaseTest
 {
-    const TEMP_LOG_FILE = './Tests/report/stderr.log';
+    const TEMP_LOG_FILE = './JLog/Tests/report/stderr.log';
+
+    private function _getStdErrSettings()
+    {
+        return array(
+            'groups' => array(
+                array(
+                    array('type' => 'stderr')
+                )
+            )
+        );
+    }
 
     public function setUp()
     {
         parent::setUp();
         ini_set('error_log', self::TEMP_LOG_FILE);
-        JLogger::init('./Tests/settings/StdErr.xml');
+        JLog::init($this->_getStdErrSettings());
     }
 
     public function tearDown()
@@ -23,10 +39,10 @@ class StdErrorTest
      */
     public function testBasicUsage($input, $expected)
     {
-        JLogger::log($input);
+        JLog::log($input);
         $logFile = file_get_contents(self::TEMP_LOG_FILE);
         $jsonString = trim(substr($logFile, strpos($logFile, ']')+1)); // strip off the timestamp
         $message = json_decode($jsonString, true);
-        $this->_assertMessageMatches($expected, $message, 'STDERR');
+        $this->_assertMessageMatches($expected, $message);
     }
 }
