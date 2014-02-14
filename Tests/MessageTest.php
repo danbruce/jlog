@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace JLog\Tests;
 
 use JLog\Message;
 
