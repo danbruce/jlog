@@ -50,6 +50,12 @@ class Jlog
         $this->_currentTransaction->log($item, $level);
     }
 
+    // flushes the transaction
+    private function _flush()
+    {
+        $this->_currentTransaction->flush();
+    }
+
     /**
         Initializes the logging system.
         @return void
@@ -68,7 +74,11 @@ class Jlog
     // applies the settings from an array
     private static function _applySettingsFromArray(array $settings)
     {
-        return array_merge_recursive(self::$_defaultSettings, $settings);
+        $groups = isset($settings['groups']) && is_array($settings['groups']) ?
+            $settings['groups'] : array();
+        $toReturn = array_merge_recursive(self::$_defaultSettings, $settings);
+        $toReturn['groups'] = count($groups) ? $groups : self::$_defaultSettings['groups'];
+        return $toReturn;
     }
 
     // applies the settings from a file path
@@ -151,6 +161,10 @@ class Jlog
     */
     public static function flush()
     {
+        if (!isset(self::$_instance)) {
+            throw new Exception('JLog must be initialized with a call to JLog::init()');
+        }
 
+        self::$_instance->_flush();
     }
 }

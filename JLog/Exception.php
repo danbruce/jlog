@@ -11,6 +11,6 @@ namespace JLog;
  * @extends \Exception
  * @brief A subclass of PHP's Exception class.
  */
-class JLogException extends \Exception {}
+class Exception extends \Exception {}
 
 ?>

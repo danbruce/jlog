@@ -25,7 +25,8 @@ class Transaction
 
     private static $_storageTypeClasses = array(
         'stdout' => 'JLog\Storage\StdOutStorage',
-        'stderr' => 'JLog\Storage\StdErrStorage'
+        'stderr' => 'JLog\Storage\StdErrStorage',
+        'folder' => 'JLog\Storage\FolderStorage'
     );
 
     /**
@@ -67,6 +68,14 @@ class Transaction
         $this->_id = hash('sha256', uniqid());
     }
 
+    public function getId()
+    {
+        if (!isset($this->_id)) {
+            $this->_generateNewId();
+        }
+        return $this->_id;
+    }
+
     /**
         Logs the object $item onto this transaction at the specified $level.
         @param mixed $item The item to be logged.
@@ -87,16 +96,18 @@ class Transaction
             return;
         }
 
-        $this->_writeStorage($fullMessage);
-    }
-
-    private function _writeStorage($message)
-    {
         foreach ($this->_groups as $group) {
             foreach ($group as $storage) {
-                $storage->write($message);
+                $this->_writeStorage($storage, $fullMessage);
             }
         }
+    }
+
+    private function _writeStorage($storage, $message)
+    {
+        $storage->preWrite($this);
+        $storage->write($message);
+        $storage->postWrite($this);
     }
 
     // constructs the _fullMessage array from the environment
@@ -116,8 +127,17 @@ class Transaction
      */
     public final function flush()
     {
-        foreach ($this->_log as $message) {
-            $this->_writeStorage($message);
+        foreach ($this->_groups as $group) {
+            foreach ($group as $storage) {
+                if (count($this->_log)) {
+                    $storage->beforeBufferedWrite($this);
+                    foreach ($this->_log as $message) {
+                        $this->_writeStorage($storage, $message);
+                    }
+                    $storage->afterBufferedWrite($this);
+                }
+                $storage->close();
+            }
         }
     }
 }

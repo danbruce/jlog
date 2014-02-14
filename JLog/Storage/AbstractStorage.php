@@ -2,6 +2,8 @@
 
 namespace JLog\Storage;
 
+use JLog\Transaction;
+
 /**
     @class JLog\Storage\AbstractStorage
     @brief An abstract class with empty functions for simple storage mechanism that don't require
@@ -10,13 +12,17 @@ namespace JLog\Storage;
 abstract class AbstractStorage
     implements StorageInterface
 {
-    public function setup($settings = null) {}
+    public function setup($settings) {}
+
+    public function preWrite(Transaction $transaction) {}
 
     public abstract function write($string);
 
-    public function beforeBufferedWrite() {}
+    public function postWrite(Transaction $transaction) {}
 
-    public function afterBufferedWrite() {}
+    public function beforeBufferedWrite(Transaction $transaction) {}
+
+    public function afterBufferedWrite(Transaction $transaction) {}
 
     public function close() {}
 }

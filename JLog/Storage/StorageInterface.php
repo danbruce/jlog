@@ -2,11 +2,15 @@
 
 namespace JLog\Storage;
 
+use JLog\Transaction;
+
 interface StorageInterface
 {
-    public function setup($settings = null);
+    public function setup($settings);
+    public function preWrite(Transaction $transaction);
     public function write($string);
-    public function beforeBufferedWrite();
-    public function afterBufferedWrite();
+    public function postWrite(Transaction $transaction);
+    public function beforeBufferedWrite(Transaction $transaction);
+    public function afterBufferedWrite(Transaction $transaction);
     public function close();
 }
