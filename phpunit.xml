@@ -9,10 +9,10 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./JLog</directory>
+            <exclude>
+                <directory suffix=".php">./JLog/Storage</directory>
+            </exclude>
         </whitelist>
-        <blacklist>
-
-        </blacklist>
     </filter>
     <logging>
         <log type="coverage-html" target="./Tests/report" charset="UTF-8" highlight="true"/>

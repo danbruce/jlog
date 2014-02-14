@@ -7,16 +7,20 @@ use JLog\Message;
 class MessageTest
     extends BaseTest
 {
+    /**
+       @dataProvider baseProvider
+    */
+    public function testUsage($input, $expected)
+    {
+        $message = new Message($input);
+        $this->assertEquals($expected['contents'], $message->__toString());
 
-    private function _getDefaultItem()
-    {
-        return 'Test message';
-    }
-    
-    public function testConstructor()
-    {
-        $item = $this->_getDefaultItem();
-        $message = new Message($item);
-        $this->assertTrue(true);
+        $recursiveMessage = new Message($message);
+        $this->assertEquals($expected['contents'], $recursiveMessage->__toString());
+
+        $testObject = new \stdClass;
+        $testObject->property = 'My value';
+        $objectMessage = new Message($testObject);
+        $this->assertEquals(serialize($testObject), $objectMessage->__toString());
     }
 }

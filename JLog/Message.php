@@ -34,7 +34,7 @@ class Message
      */
     public function __construct($item)
     {
-        $this->_contents = json_encode($item);
+        $this->_contents = $item;
     }
 
     /**
@@ -43,7 +43,17 @@ class Message
      */
     public function __toString()
     {
-        return $this->_contents;
+        // if we are logging an actual instance of an object, let's be a bit
+        // more intelligent and actually check if this class has its own
+        // __toString() method or if it can be serialized
+        if (is_object($this->_contents)) {
+            if (method_exists($this->_contents, '__toString')) {
+                $this->_contents = $this->_contents->__toString();
+            } else {
+                $this->_contents = serialize($this->_contents);
+            }
+        }
+        return (string)$this->_contents;
     }
 }
 

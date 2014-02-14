@@ -44,25 +44,11 @@ class Transaction
     // @todo SECRET SAUCE GOES HERE
     private function _constructFullMessage(Message $message, $level)
     {
-        // setup the array that will be returned eventually
-        $ret = array(
+        return array(
             'transaction' => $this->_id,
             'level'       => $level,
-            'contents'    => $message,
+            'contents'    => $message->__toString()
         );
-
-        // if we are logging an actual instance of an object, let's be a bit
-        // more intelligent and actually check if this class has its own
-        // __toString() method or if it can be serialized
-        if (is_object($ret['contents'])) {
-            if (method_exists($ret['contents'], '__toString')) {
-                $ret['contents'] = $ret['contents']->__toString();
-            } else {
-                $ret['contents'] = serialize($ret['contents']);
-            }
-        }
-
-        return $ret;
     }
     
     /**
