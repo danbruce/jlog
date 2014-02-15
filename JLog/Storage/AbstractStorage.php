@@ -26,9 +26,5 @@ abstract class AbstractStorage
 
     public function postWrite(Transaction $transaction) {}
 
-    public function beforeBufferedWrite(Transaction $transaction) {}
-
-    public function afterBufferedWrite(Transaction $transaction) {}
-
     public function close() {}
 }

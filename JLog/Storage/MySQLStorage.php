@@ -20,10 +20,22 @@ class MySQLStorage
     private $_tablePrefix = '';
 
     // a few prepared PDO statements for efficient queries
-    private $_lookupUniqueIDStatement = null;
     private $_insertTransactionStatement = null;
     private $_insertMessageStatement = null;
-    private $_updateTransactionModifyDateStatement = null;
+
+    public function isValidTransactionId($id)
+    {
+        if (isset($this->_transactionDatabaseID)) {
+            return true;
+        }
+
+        try {
+            $this->_transactionDatabaseID = intval($this->_insertTransaction($id));
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
 
     public function setup($settings)
     {
@@ -32,7 +44,20 @@ class MySQLStorage
 
     public function write($string)
     {
-    
+        $this->_prepareMessageInsertStatement();
+        $stmt = $this->_insertMessageStatement;
+        $stmt->bindParam(
+            ':transID',
+            $this->_transactionDatabaseID,
+            \PDO::PARAM_INT
+        );
+        $stmt->bindParam(
+            ':message',
+            $string,
+            \PDO::PARAM_STR,
+            strlen($string)
+        );
+        $stmt->execute();
     }
 
     public function close()
@@ -56,70 +81,12 @@ class MySQLStorage
         }
     }
 
-    // generates a unique transaction ID
-    private function _generateNewID()
-    {
-        // we need to prepare the query that checks for a unique ID
-        if ($this->_prepareLookupStatement()) {
-            $rowCount = 1;
-            // loop until we find a unique id
-            do {
-                // generate a hashed ID
-                $trans_id = hash('sha256', uniqid('', true));
-                // bind the parameters to the query
-                $success = $this->_lookupUniqueIDStatement->bindParam(
-                    ':transID',
-                    $trans_id,
-                    PDO::PARAM_STR,
-                    strlen($trans_id)
-                );
-                // if binding was successful
-                if ($success) {
-                    // execute the query
-                    if (!$this->_lookupUniqueIDStatement->execute()) {
-// @codeCoverageIgnoreStart
-                        throw new JLogException(
-                            'Unable to execute lookup statement.'
-                        );
-                    }
-// @codeCoverageIgnoreEnd
-                    // count how many rows matched this unique ID
-                    $rowCount = $this->_lookupUniqueIDStatement->rowCount();
-                }
-            } while ($rowCount > 0);
-            return $trans_id;
-        } else {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
-                'Unable to prepare unique ID lookup statement.'
-            );
-        }
-// @codeCoverageIgnoreEnd
-    }
-
     // a generic function for preparing all of the above statements
     private function _prepareGenericStatement($statementName, $query)
     {
         // prepare the statement
         $this->$statementName = $this->_pdo->prepare($query);
         return ($this->$statementName) ? true : false;
-    }
-    
-    // prepares the lookup statement for finding unique transaction IDs
-    private function _prepareLookupStatement()
-    {
-        $stmtName = '_lookupUniqueIDStatement';
-
-        $prefix = $this->_tablePrefix;
-        $queryString  = 'SELECT `'.$prefix.'Transactions`.`id` ';
-        $queryString .= 'FROM `'.$prefix.'Transactions` ';
-        $queryString .= 'WHERE `'.$prefix.
-                        'Transactions`.`transactionID` = :transID ';
-        $queryString .= 'LIMIT 1';
-        return $this->_prepareGenericStatement(
-            $stmtName,
-            $queryString
-        );
     }
 
     // prepares the transaction insert statement for adding new transactions to
@@ -159,165 +126,28 @@ class MySQLStorage
         );
     }
 
-    // prepare the statement which updates the transacations last modifyDate
-    // field
-    private function _prepareUpdateTransactionModifyDateStatement()
-    {
-        $stmtName = '_updateTransactionModifyDateStatement';
-        if ($this->$stmtName) {
-            return true;
-        }
-
-        $prefix = $this->_tablePrefix;
-        $queryString  = 'UPDATE `'.$prefix.'Transactions` ';
-        $queryString .= 'SET `'.$prefix.'Transactions`.`modifyDate` = NOW() ';
-        $queryString .= 'WHERE `'.$prefix.'Transactions`.`id` = :transID ';
-        $queryString .= 'LIMIT 1';
-        return $this->_prepareGenericStatement(
-            $stmtName,
-            $queryString
-        );
-    }
-
     // inserts a new transaction in the database
-    private function _insertTransaction()
+    private function _insertTransaction($transactionId)
     {
-        // check if the statement for inserting transactions has been prepared
-        if (!$this->_prepareTransactionInsertStatement()) {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
-                'Unable to prepare transaction insert statement.'
-            );
-        }
-// @codeCoverageIgnoreEnd
-
-        // bind the params
-        $success = $this->_insertTransactionStatement->bindParam(
+        // ensure the statement is prepared
+        $this->_prepareTransactionInsertStatement();
+        // fetch the statement and bind the parameter
+        $stmt = $this->_insertTransactionStatement;
+        $stmt->bindParam(
             ':transID',
-            $this->id,
-            PDO::PARAM_STR,
-            strlen($this->id)
+            $transactionId,
+            \PDO::PARAM_STR,
+            strlen($transactionId)
         );
-
-        // if we failed to bind the params throw an exception
-        if (!$success) {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
-                'Unable to bind params to insert transaction query.'
-                );
-        }
-// @codeCoverageIgnoreEnd
         // execute the actual insertion
-        if (!$this->_insertTransactionStatement->execute()) {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
+        if (!$stmt->execute()) {
+            throw new Exception(
                 'Unable to execute insert transaction query.'
             );
         }
-// @codeCoverageIgnoreEnd
 
-        // return the PDO classes last insert ID as the new transaction
-        // database ID
+        // return the PDO classes last insert ID as the new transaction database ID
         return $this->_pdo->lastInsertId();
-    }
-
-    // inserts a message into the database
-    private function _insertMessages()
-    {
-        // check if the statement for inserting messages has been prepared
-        if (!$this->_prepareMessageInsertStatement()) {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
-                'Unable to prepare message insert statement.'
-            );
-        }
-// @codeCoverageIgnoreEnd
-
-        // bind the params
-        $success = $this->_insertMessageStatement->bindParam(
-            ':transID',
-            $this->_transactionDatabaseID,
-            PDO::PARAM_INT
-        );
-
-        // if we failed to bind the params throw an exception
-        if (!$success) {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
-                'Unable to bind :transID param to message insert statement'
-            );
-        }
-// @codeCoverageIgnoreEnd
-
-        // count how many elements are in this log
-        $logCount = count($this->log);
-        // and we'll loop while the write pointer is less than the number
-        // of elements in the log (ie we have objects remaining to be written)
-        while($this->_writePtr < $logCount) {
-            // fetch the message from the log
-            $message = $this->log[$this->_writePtr];
-            // turn the message into a JSON string
-            $messageString = $message->__toString();
-            // bind the message string to the parameters of the query
-            $success = $this->_insertMessageStatement->bindParam(
-                ':message',
-                $messageString,
-                PDO::PARAM_STR,
-                strlen($messageString)
-            );
-            // if we failed to bind the params throw an exception
-            if (!$success) {
-// @codeCoverageIgnoreStart
-                throw new JLogException(
-                    'Unable to bind :message param to message insert statement'
-                );
-            }
-// @codeCoverageIgnoreEnd
-            // perform the actual insertion
-            if (!$this->_insertMessageStatement->execute()) {
-// @codeCoverageIgnoreStart
-                throw new JLogException(
-                    'Unable to execute insert message statement'
-                );
-            }
-// @codeCoverageIgnoreEnd
-            // increment the write pointer
-            $this->_writePtr++;
-        }
-        // update the last time the transaction was modified
-        $this->_updateTransactionModifyDate();
-    }
-
-    // executes the update query to set the last modification timestamp of the
-    // transaction to NOW()
-    private function _updateTransactionModifyDate()
-    {
-        // prepare the statement
-        $this->_prepareUpdateTransactionModifyDateStatement();
-
-        // bind the params
-        $success = $this->_updateTransactionModifyDateStatement->bindParam(
-            ':transID',
-            $this->_transactionDatabaseID,
-            PDO::PARAM_INT
-        );
-        // if the params failed to bind throw an exception
-        if (!$success) {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
-                'Unable to bind :transID param to transaction modify date update statement'
-            );
-        }
-// @codeCoverageIgnoreEnd
-
-        // execute the update query
-        if (!$this->_updateTransactionModifyDateStatement->execute()) {
-// @codeCoverageIgnoreStart            
-            throw new JLogException(
-                'Unable to execute transaction modify date update statement'
-            );
-        }
-// @codeCoverageIgnoreEnd
     }
 }
 

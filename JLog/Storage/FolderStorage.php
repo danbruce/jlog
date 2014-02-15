@@ -49,23 +49,24 @@ class FolderStorage
     public function preWrite(Transaction $transaction)
     {
         parent::preWrite($transaction);
-        if (isset($this->_fp)) {
-            return;
+        if (!isset($this->_fp)) {
+            $writeFilePath = $this->_rootFolder.DIRECTORY_SEPARATOR.$transaction->getId();
+            $this->_fp = fopen($writeFilePath, 'w');
+            if (false === $this->_fp) {
+                throw new Exception('Unable to open file for writing: '.$writeFilePath);
+            }
         }
-
-        $writeFilePath = $this->_rootFolder.DIRECTORY_SEPARATOR.$transaction->getId();
-        $this->_fp = fopen($writeFilePath, 'w');
-        if (false === $this->_fp) {
-// @codeCoverageIgnoreStart
-            throw new Exception('Unable to open file for writing: '.$writeFilePath);
-        }
-// @codeCoverageIgnoreEnd
+        flock($this->_fp, LOCK_EX);
     }
 
     public function write($string)
     {
-        flock($this->_fp, LOCK_EX);
         fwrite($this->_fp, $string.PHP_EOL);
+    }
+
+    public function postWrite(Transaction $transaction)
+    {
+        parent::postWrite($transaction);
         flock($this->_fp, LOCK_UN);
     }
 

@@ -82,7 +82,7 @@ class Jlog
     }
 
     // applies the settings from a file path
-    private static function _applySettingsFromFilePath(string $filePath)
+    private static function _applySettingsFromFilePath($filePath)
     {
         $settings = json_decode(file_get_contents($filePath), true);
         return is_array($settings) ? $settings : array();
@@ -166,5 +166,6 @@ class Jlog
         }
 
         self::$_instance->_flush();
+        self::$_instance = null;
     }
 }

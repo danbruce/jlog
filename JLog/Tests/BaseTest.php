@@ -2,6 +2,8 @@
 
 namespace JLog\Tests;
 
+use JLog\Exception;
+
 abstract class BaseTest
     extends \PHPUnit_Framework_TestCase
 {

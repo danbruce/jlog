@@ -16,8 +16,6 @@ class Transaction
 {
     // a unique transaction id
     private $_id;
-    // a buffer of items to be logged
-    private $_log;
     // the transaction settings
     private $_settings;
     // the list of storage groups
@@ -37,7 +35,6 @@ class Transaction
      */
     public function __construct($settings)
     {
-        $this->_log = array();
         $this->_settings = $settings;
         $this->_groups = $this->_buildGroupsFromSettings();
     }
@@ -103,12 +100,6 @@ class Transaction
 
         $message = new Message($item);
         $fullMessage = json_encode($this->_constructFullMessage($message, $level));
-
-        if ($this->_settings['buffer']) {
-            $this->_log[] = $fullMessage;
-            return;
-        }
-
         foreach ($this->_groups as $group) {
             foreach ($group as $storage) {
                 $this->_writeStorage($storage, $fullMessage);
@@ -142,13 +133,6 @@ class Transaction
     {
         foreach ($this->_groups as $group) {
             foreach ($group as $storage) {
-                if (count($this->_log)) {
-                    $storage->beforeBufferedWrite($this);
-                    foreach ($this->_log as $message) {
-                        $this->_writeStorage($storage, $message);
-                    }
-                    $storage->afterBufferedWrite($this);
-                }
                 $storage->close();
             }
         }

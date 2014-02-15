@@ -3,7 +3,8 @@
 namespace JLog\Tests\Storage;
 
 use JLog\Tests\BaseTest,
-    JLog\JLog;
+    JLog\JLog,
+    JLog\Storage\MySQLStorage;
 
 class MySQLStorageTest
     extends \PHPUnit_Extensions_Database_TestCase
@@ -43,7 +44,7 @@ class MySQLStorageTest
     }
 
     /**
-     * @return PHPUnit_Extensions_Database_DataSet_IDataSet
+        @return PHPUnit_Extensions_Database_DataSet_IDataSet
      */
     public function getDataSet()
     {
@@ -75,23 +76,34 @@ class MySQLStorageTest
      */
     public function testBasicUsage($input, $expected)
     {
+        $this->assertEquals(0, $this->getConnection()->getRowCount('testing_Transactions'));
+        $this->assertEquals(0, $this->getConnection()->getRowCount('testing_Messages'));
         JLog::log($input);
-        $this->assertTrue(true);
-        /*
-        $logFile = file_get_contents(self::TEMP_LOG_FILE);
-        $jsonString = trim(substr($logFile, strpos($logFile, ']')+1)); // strip off the timestamp
-        $message = json_decode($jsonString, true);
-        $this->_assertMessageMatches($expected, $message);
-        */
+        JLog::log($input);
+        $this->assertEquals(1, $this->getConnection()->getRowCount('testing_Transactions'));
+        $this->assertEquals(2, $this->getConnection()->getRowCount('testing_Messages'));
     }
 
     /**
-        @expectedException        \JLog\Exception
+        @expectedException \JLog\Exception
      */
     public function testInvalidPassword()
     {
         $settings = $this->_getMySQLSettings();
         $settings['groups'][0][0]['password'] = 'invalid password';
         JLog::init($settings);
+    }
+
+    public function testDuplicateTransactionId()
+    {
+        $storage = new MySQLStorage;
+        $storage->setup($this->_getMySQLSettings()['groups'][0][0]);
+        $transactionId = hash('sha256', uniqid());
+        $this->assertTrue($storage->isValidTransactionId($transactionId));
+        $this->assertTrue($storage->isValidTransactionId($transactionId));
+        
+        $storage = new MySQLStorage;
+        $storage->setup($this->_getMySQLSettings()['groups'][0][0]);
+        $this->assertFalse($storage->isValidTransactionId($transactionId));
     }
 }
