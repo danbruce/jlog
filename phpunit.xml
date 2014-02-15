@@ -11,16 +11,13 @@
             <directory suffix=".php">./JLog</directory>
             <exclude>
                 <directory suffix=".php">./JLog/Tests</directory>
-                <file>./JLog/Storage/JLogEmailTransaction.php</file>
-                <file>./JLog/Storage/JLogFileTransaction.php</file>
                 <file>./JLog/Storage/JLogMySQLTransaction.php</file>
                 <file>./JLog/Storage/JLogSocketTransaction.php</file>
-                <file>./JLog/Storage/JLogStdErrTransaction.php</file>
-                <file>./JLog/Storage/JLogStreamTransaction.php</file>
+
             </exclude>
         </whitelist>
     </filter>
     <logging>
-        <log type="coverage-html" target="./Tests/report" charset="UTF-8" highlight="true"/>
+        <log type="coverage-html" target="./JLog/Tests/report" charset="UTF-8" highlight="true"/>
     </logging>
 </phpunit>
