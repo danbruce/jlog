@@ -26,7 +26,8 @@ class Transaction
     private static $_storageTypeClasses = array(
         'stdout' => 'JLog\Storage\StdOutStorage',
         'stderr' => 'JLog\Storage\StdErrStorage',
-        'folder' => 'JLog\Storage\FolderStorage'
+        'folder' => 'JLog\Storage\FolderStorage',
+        'email' => 'JLog\Storage\EmailStorage'
     );
 
     /**
