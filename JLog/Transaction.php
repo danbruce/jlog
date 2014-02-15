@@ -27,7 +27,8 @@ class Transaction
         'stdout' => 'JLog\Storage\StdOutStorage',
         'stderr' => 'JLog\Storage\StdErrStorage',
         'folder' => 'JLog\Storage\FolderStorage',
-        'email' => 'JLog\Storage\EmailStorage'
+        'email' => 'JLog\Storage\EmailStorage',
+        'mysql' => 'JLog\Storage\MySQLStorage'
     );
 
     /**
@@ -66,7 +67,18 @@ class Transaction
     // generates a new transaction ID
     private function _generateNewId()
     {
-        $this->_id = hash('sha256', uniqid());
+        do {
+            $this->_id = hash('sha256', uniqid());
+            $idIsValid = true;
+            foreach ($this->_groups as $group) {
+                foreach ($group as $storage) {
+                    if (false === $storage->isValidTransactionId($this->_id)) {
+                        $idIsValid = false;
+                        break 2;
+                    }
+                }
+            }
+        } while (false === $idIsValid);
     }
 
     public function getId()

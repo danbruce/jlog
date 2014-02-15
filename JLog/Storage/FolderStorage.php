@@ -19,6 +19,11 @@ class FolderStorage
     // the path to the root folder
     private $_rootFolder;
 
+    public function isValidTransactionId($id)
+    {
+        return !file_exists($this->_rootFolder.DIRECTORY_SEPARATOR.$id);
+    }
+
     public function setup($settings)
     {
         if (!isset($settings['rootFolder']) ||

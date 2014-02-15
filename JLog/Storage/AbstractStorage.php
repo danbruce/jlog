@@ -12,6 +12,12 @@ use JLog\Transaction;
 abstract class AbstractStorage
     implements StorageInterface
 {
+
+    public function isValidTransactionId($id)
+    {
+        return true;
+    }
+
     public function setup($settings) {}
 
     public function preWrite(Transaction $transaction) {}

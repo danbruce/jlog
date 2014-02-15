@@ -6,6 +6,7 @@ use JLog\Transaction;
 
 interface StorageInterface
 {
+    public function isValidTransactionId($id);
     public function setup($settings);
     public function preWrite(Transaction $transaction);
     public function write($string);

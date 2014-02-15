@@ -1,21 +1,21 @@
 <?php
-/**
- * @file Classes/JLogMySQLTransaction.php
- * @brief Implemention of the JLogMySQLTransaction class.
- */
+
+namespace JLog\Storage;
+
+use JLog\Exception;
 
 /**
- * @class JLogMySQLTransaction
- * @brief A transaction for writing the log to a MySQL database.
+ * @class MySQLStorage
+ * @brief A storage class for writing to a MySQL database
  */
-class JLogMySQLTransaction extends JLogTransaction
+class MySQLStorage
+    extends AbstractStorage
+    implements StorageInterface
 {
     // the pdo class object pointing to the database
     private $_pdo = null;
     // the transacation database ID
     private $_transactionDatabaseID = null;
-    // the pointer to where in the log we last wrote
-    private $_writePtr = 0;
     // the prefix on the table names
     private $_tablePrefix = '';
 
@@ -25,43 +25,19 @@ class JLogMySQLTransaction extends JLogTransaction
     private $_insertMessageStatement = null;
     private $_updateTransactionModifyDateStatement = null;
 
-    /**
-     * Constructor for the class.
-     * @param array $details The details for connecting to the database.
-     * @throws JLogException Throws an exception if we cannot connect to the
-     * database.
-     */
-    public function __construct($details)
+    public function setup($settings)
     {
-        // setup the PDO object
-        $this->_constructPDO($details);
-        // generate a new transaction ID and pass it to the parent class
-        parent::__construct($this->_generateNewID());
-        $this->_writePtr = 0;
+        $this->_constructPDO($settings);
     }
 
-    /**
-     * Inserts the logged objects into the database tables.
-     * @param bool $final If true, then we are writing to the log for the last
-     * time so we close the connection to the PDO.
-     * @return void
-     * @throws JLogException Throws an exception if anything goes wrong.
-     */
-    public function write($final = false)
+    public function write($string)
     {
-        // if we don't yet have a transaction database ID, we need to
-        // insert the transaction into the database
-        if (!isset($this->_transactionDatabaseID)) {
-            $this->_transactionDatabaseID = $this->_insertTransaction();
-        }
+    
+    }
 
-        // write the unlogged messages to the database
-        $this->_insertMessages();
-
-        // if this is the final write, close the connection to the database
-        if ($final) {
-            $this->_destroyPDO();
-        }
+    public function close()
+    {
+        $this->_pdo = null;
     }
 
     // creates the PDO object we will use to write to the database
@@ -73,20 +49,11 @@ class JLogMySQLTransaction extends JLogTransaction
         }
         $pdoString  = 'mysql:dbname='.$database.';';
         $pdoString .= 'host='.$host;
-        $this->_pdo = new PDO($pdoString, $username, $password);
-        if (!$this->_pdo) {
-// @codeCoverageIgnoreStart
-            throw new JLogException(
-                'Unable to initialize PDO object.'
-            );
+        try {
+            $this->_pdo = new \PDO($pdoString, $username, $password);
+        } catch (\PDOException $e) {
+            throw new Exception($e->getMessage());
         }
-// @codeCoverageIgnoreEnd
-    }
-
-    // clears the current pdo object
-    private function _destroyPDO()
-    {
-        $this->_pdo = null;
     }
 
     // generates a unique transaction ID
