@@ -5,7 +5,7 @@ namespace JLog\Tests\Storage;
 use JLog\Tests\BaseTest,
     JLog\JLog;
 
-class StdErrTest
+class StdErrStorageTest
     extends BaseTest
 {
     const TEMP_LOG_FILE = './JLog/Tests/report/stderr.log';

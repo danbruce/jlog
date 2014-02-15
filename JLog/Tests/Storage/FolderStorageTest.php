@@ -5,7 +5,7 @@ namespace JLog\Tests\Storage;
 use JLog\Tests\BaseTest,
     JLog\JLog;
 
-class FolderTest
+class FolderStorageTest
     extends BaseTest
 {    
     const ROOT_FOLDER = './JLog/Tests/report/folderTest/';

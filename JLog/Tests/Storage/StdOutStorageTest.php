@@ -5,7 +5,7 @@ namespace JLog\Tests\Storage;
 use JLog\Tests\BaseTest,
     JLog\JLog;
 
-class StdOutTest
+class StdOutStorageTest
     extends BaseTest
 {
     /**
