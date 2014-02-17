@@ -21,6 +21,6 @@ class MessageTest
         $testObject = new \stdClass;
         $testObject->property = 'My value';
         $objectMessage = new Message($testObject);
-        $this->assertEquals(serialize($testObject), $objectMessage->__toString());
+        $this->assertEquals(json_encode($testObject), $objectMessage->__toString());
     }
 }
