@@ -1,8 +1,8 @@
 <?php
 
-namespace JLog\Tests\Storage;
+namespace JLogTestsStorage;
 
-use JLog\Tests\BaseTest,
+use JLogTests\BaseTest,
     JLog\JLog,
     JLog\Storage\EmailStorage;
 

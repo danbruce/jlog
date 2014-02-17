@@ -1,8 +1,8 @@
 <?php
 
-namespace JLog\Tests\Storage;
+namespace JLogTestsStorage;
 
-use JLog\Tests\BaseTest,
+use JLogTests\BaseTest,
     JLog\JLog,
     JLog\Storage\MySQLStorage;
 
@@ -50,7 +50,7 @@ class MySQLStorageTest
     {
         if (isset(self::$_dataSet)) return self::$_dataSet;
 
-        self::$_dataSet = $this->createFlatXMLDataSet('./JLog/Tests/empty_database.xml');
+        self::$_dataSet = $this->createFlatXMLDataSet('./JLogTests/empty_database.xml');
         return self::$_dataSet;
     }
 

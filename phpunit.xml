@@ -1,20 +1,17 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/3.7/phpunit.xsd"
-    bootstrap="./JLog/Tests/bootstrap.php" colors="true" strict="true">
+    bootstrap="./JLogTests/bootstrap.php" colors="true" strict="true">
     <testsuites>
         <testsuite name="All Tests">
-            <directory>./JLog/Tests</directory>
+            <directory>./JLogTests</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./JLog</directory>
-            <exclude>
-                <directory suffix=".php">./JLog/Tests</directory>
-            </exclude>
         </whitelist>
     </filter>
     <logging>
-        <log type="coverage-html" target="./JLog/Tests/report" charset="UTF-8" highlight="true"/>
+        <log type="coverage-html" target="./JLogTests/report" charset="UTF-8" highlight="true"/>
     </logging>
 </phpunit>

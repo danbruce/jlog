@@ -1,6 +1,6 @@
 <?php
 
-namespace JLog\Tests;
+namespace JLogTests;
 
 use JLog\Exception,
     JLog\JLog,
@@ -19,7 +19,7 @@ class JLogTest
 
     public function testInitFromFile()
     {
-        JLog::init('./JLog/Tests/stdout_file_example.json');
+        JLog::init('./JLogTests/stdout_file_example.json');
         JLog::flush();
         $this->assertTrue(true);
     }

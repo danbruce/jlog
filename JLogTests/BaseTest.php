@@ -1,6 +1,6 @@
 <?php
 
-namespace JLog\Tests;
+namespace JLogTests;
 
 use JLog\Exception;
 
