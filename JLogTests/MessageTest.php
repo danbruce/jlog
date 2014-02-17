@@ -22,5 +22,9 @@ class MessageTest
         $testObject->property = 'My value';
         $objectMessage = new Message($testObject);
         $this->assertEquals(json_encode($testObject), $objectMessage->__toString());
+
+        $testArray = array(1,2,3,4);
+        $objectMessage = new Message($testArray);
+        $this->assertEquals(json_encode($testArray), $objectMessage->__toString());
     }
 }
