@@ -21,26 +21,21 @@ class Transaction
     // the list of storage groups
     private $_groups;
 
-    private static $_storageTypeClasses = array(
-        'stdout' => 'JLog\Storage\StdOutStorage',
-        'stderr' => 'JLog\Storage\StdErrStorage',
-        'folder' => 'JLog\Storage\FolderStorage',
-        'email' => 'JLog\Storage\EmailStorage',
-        'mysql' => 'JLog\Storage\MySQLStorage'
-    );
-
     /**
         Constructor for the class.
         @param mixed $id The unique identifier for this transaction.
      */
-    public function __construct($settings)
+    public function __construct($settings, $storageFactory = null)
     {
         $this->_settings = $settings;
-        $this->_groups = $this->_buildGroupsFromSettings();
+        if (!isset($storageFactory)) {
+            $storageFactory = new StorageFactory;
+        }
+        $this->_groups = $this->_buildGroupsFromSettings($storageFactory);
     }
 
     // builds the list of storage groups from the settings
-    private function _buildGroupsFromSettings()
+    private function _buildGroupsFromSettings(StorageFactory $factory)
     {
         $groups = array();
         foreach ($this->_settings['groups'] as $settingsGroup) {
@@ -49,10 +44,9 @@ class Transaction
                 if (!isset($settingsStorage['type']) || strlen($settingsStorage['type']) < 1) {
                     throw new Exception('Missing type for storage.');
                 }
-                if (!array_key_exists($settingsStorage['type'], self::$_storageTypeClasses)) {
-                    throw new Exception('Unknown type: '.$settingsStorage['type'].' for storage.');
-                }
-                $storage = new self::$_storageTypeClasses[$settingsStorage['type']];
+                $storage = $factory->getStorageFromString(
+                    strtolower(trim($settingsStorage['type']))
+                );
                 $storage->setup($settingsStorage);
                 $group[] = $storage;
             }

@@ -2,7 +2,8 @@
 
 namespace JLog\Storage;
 
-use JLog\Exception;
+use JLog\Exception,
+    JLog\Transaction;
 
 /**
  * @class MySQLStorage
@@ -42,6 +43,12 @@ class MySQLStorage
         $this->_constructPDO($settings);
     }
 
+    public function preWrite(Transaction $transaction)
+    {
+        parent::preWrite($transaction);
+        $this->_pdo->beginTransaction();
+    }
+
     public function write($string)
     {
         $this->_prepareMessageInsertStatement();
@@ -58,6 +65,12 @@ class MySQLStorage
             strlen($string)
         );
         $stmt->execute();
+    }
+
+    public function postWrite(Transaction $transaction)
+    {
+        parent::postWrite($transaction);
+        $this->_pdo->commit();
     }
 
     public function close()

@@ -90,7 +90,7 @@ class JLogTest
 
     /**
         @expectedException JLog\Exception
-        @expectedExceptionMessage Unknown type: unknown for storage.
+        @expectedExceptionMessage Unknown type: "unknown" for storage.
      */
     public function testUnknownType()
     {
@@ -115,5 +115,24 @@ class JLogTest
         );
         $t = new Transaction($settings);
         $this->assertEquals($t->getId(), $t->getId());
+    }
+
+    public function testTransactionFailsFirstIdCheck()
+    {
+        $settings = array(
+            'groups' => array(
+                array(
+                    array('type' => 'stdout')
+                )
+            )
+        );
+        $transaction = new Transaction(
+            $settings,
+            new MockStorageFactory(MockStorageFactory::CONFIG_FAILS_FIRST_TRANSACTION_ID)
+        );
+        ob_start();
+        $transaction->log('test', Message::LEVEL_FATAL);
+        $message = ob_end_clean();
+        $this->assertGreaterThan(0, strlen($message));
     }
 }

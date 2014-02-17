@@ -11,9 +11,6 @@
             <directory suffix=".php">./JLog</directory>
             <exclude>
                 <directory suffix=".php">./JLog/Tests</directory>
-                <file>./JLog/Storage/JLogMySQLTransaction.php</file>
-                <file>./JLog/Storage/JLogSocketTransaction.php</file>
-
             </exclude>
         </whitelist>
     </filter>
