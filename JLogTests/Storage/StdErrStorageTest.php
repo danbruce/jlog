@@ -8,7 +8,7 @@ use JLogTests\BaseTest,
 class StdErrStorageTest
     extends BaseTest
 {
-    const TEMP_LOG_FILE = './JLog/Tests/report/stderr.log';
+    const TEMP_LOG_FILE = './JLogTests/report/stderr.log';
 
     private function _getStdErrSettings()
     {
