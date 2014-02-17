@@ -8,7 +8,7 @@ use JLogTests\BaseTest,
 class FolderStorageTest
     extends BaseTest
 {    
-    const ROOT_FOLDER = './JLog/Tests/report/folderTest/';
+    const ROOT_FOLDER = './JLogTests/report/folderTest/';
 
     private function _getFolderSettings()
     {
