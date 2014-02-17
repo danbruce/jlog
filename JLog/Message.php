@@ -1,16 +1,18 @@
 <?php
 /**
     @file JLog/Message.php
-    @brief Implemention of the JLog\Message class.
+    @brief Contains the class definition of JLog::Message.
  */
 
+/**
+    @namespace JLog
+    @brief The main JLog namespace.
+ */
 namespace JLog;
 
 /**
-    @class Message
+    @class JLog::Message
     @brief An individual message to be logged.
-    @details Each time an object is logged, we wrap that object inside a
-    JLog\Message.
  */
 class Message
 {
@@ -30,7 +32,7 @@ class Message
 
     /**
         Constructor for the class.
-        @param mixed $c The item to the logged.
+        @param mixed $item The item to the logged.
      */
     public function __construct($item)
     {
@@ -38,8 +40,8 @@ class Message
     }
 
     /**
-     * Returns a json representation of this message.
-     * @return string The JSON representation of this message.
+        Returns a json representation of this message.
+        @retval string The JSON representation of this message.
      */
     public function __toString()
     {
@@ -50,10 +52,14 @@ class Message
             if (method_exists($this->_contents, '__toString')) {
                 $this->_contents = $this->_contents->__toString();
             } else {
-                $this->_contents = serialize($this->_contents);
+                $this->_contents = json_encode($this->_contents);
             }
+        } else if (is_array($this->_contents)) {
+            $this->_contents = json_encode($this->_contents);
+        } else if (is_scalar($this->_contents)) {
+            $this->_contents = (string)$this->_contents;
         }
-        return (string)$this->_contents;
+        return $this->_contents;
     }
 }
 

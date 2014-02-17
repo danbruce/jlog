@@ -1,7 +1,7 @@
 <?php
 /**
     @file JLog/JLog.php
-    @brief Implemention of the JLog main class.
+    @brief Contains the class definition of JLog::JLog.
  */
 
 /**
@@ -11,12 +11,10 @@
 namespace JLog;
 
 /**
-    @class JLog
-    @brief The main JLog class.
-    @details This class handles configuration settings and contains the main logging methods to be
-    called from the application.
+    @class JLog::JLog
+    @brief The main JLog class (entry point to main logging functions).
  */
-class Jlog
+class JLog
     implements JLogInterface
 {
     // contains a pointer to the current transaction
@@ -25,19 +23,21 @@ class Jlog
     // the main instance
     private static $_instance;
 
+    // an array of default settings (for anything that is missing in the provided settings)
     private static $_defaultSettings = array(
-        'buffer' => false,
-        'verbosity' => Message::LEVEL_DEBUG,
+        'buffer' => false, // do not buffer messages by default
+        'verbosity' => Message::LEVEL_DEBUG, // log all messages at any verbosity
         'groups' => array(
             array(
-                array('type' => 'stdout')
+                array('type' => 'stdout') // use a single stdout logger
             )
         )
     );
 
     /**
         Initializes the JLog instance.
-        @throws JLog\Exception Throws an exception if something went wrong.
+        @param array $settings An array of settings to be used.
+        @throws JLog::Exception Throws an exception if something went wrong.
      */
     public function __construct(array $settings)
     {
@@ -58,43 +58,42 @@ class Jlog
 
     /**
         Initializes the logging system.
-        @return void
-        @throws JLog\Exception Throws an exception if something went wrong.
+        @param string|array $settings An array of settings or a file path to load settings.
+        @throws JLog::Exception Throws an exception if something went wrong.
      */
     public static function init($settings = array())
     {
         if (is_array($settings)) {
+            // apply the settings from the passed array
             $settings = self::_applySettingsFromArray($settings);
         } else if (is_string($settings)) {
+            // find the file by the path and apply the settings from the file's contents
             $settings = self::_applySettingsFromFilePath($settings);
         }
+        // setup the new instance
         self::$_instance = new self($settings);
     }
 
-    // applies the settings from an array
-    private static function _applySettingsFromArray(array $settings)
+    /** 
+        Flushes the logging system and performs any final cleanups on the underlying storage
+        mechanisms.
+    */
+    public static function flush()
     {
-        $groups = isset($settings['groups']) && is_array($settings['groups']) ?
-            $settings['groups'] : array();
-        $toReturn = array_merge_recursive(self::$_defaultSettings, $settings);
-        $toReturn['groups'] = count($groups) ? $groups : self::$_defaultSettings['groups'];
-        return $toReturn;
-    }
+        if (!isset(self::$_instance)) {
+            throw new Exception('JLog must be initialized with a call to JLog::init()');
+        }
 
-    // applies the settings from a file path
-    private static function _applySettingsFromFilePath($filePath)
-    {
-        $settings = json_decode(file_get_contents($filePath), true);
-        return is_array($settings) ? $settings : array();
+        self::$_instance->_flush();
+        self::$_instance = null;
     }
 
     /**
         Writes the first parameter to the log.
         @param mixed $item An object to be logged.
         @param int $level An optional parameter indicating the logging level of the
-        the object. Defaults to JLog\Message::LEVEL_WARNING.
-        @return void
-        @throws JLog\Exception Throws an exception if something went wrong.
+        the object. Defaults to JLog::Message::LEVEL_WARNING.
+        @throws JLog::Exception Throws an exception if something went wrong.
      */
     public static function log($item, $level = Message::LEVEL_WARNING)
     {
@@ -106,9 +105,8 @@ class Jlog
     }
 
     /** 
-        Logs the passed value with the logging level JLog\Message::LEVEL_FATAL
+        Logs the passed value with the logging level JLog::Message::LEVEL_FATAL
         @param mixed $item An object to be logged.
-        @return void
     */
     public static function fatal($item)
     {
@@ -116,9 +114,8 @@ class Jlog
     }
 
     /** 
-        Logs the passed value with the logging level JLog\Message::LEVEL_ERROR
+        Logs the passed value with the logging level JLog::Message::LEVEL_ERROR
         @param mixed $item An object to be logged.
-        @return void
     */
     public static function error($item)
     {
@@ -126,9 +123,8 @@ class Jlog
     }
 
     /** 
-        Logs the passed value with the logging level JLog\Message::LEVEL_WARNING
+        Logs the passed value with the logging level JLog::Message::LEVEL_WARNING
         @param mixed $item An object to be logged.
-        @return void
     */
     public static function warning($item)
     {
@@ -136,9 +132,8 @@ class Jlog
     }
 
     /** 
-        Logs the passed value with the logging level JLog\Message::LEVEL_NOTICE
+        Logs the passed value with the logging level JLog::Message::LEVEL_NOTICE
         @param mixed $item An object to be logged.
-        @return void
     */
     public static function notice($item)
     {
@@ -146,26 +141,35 @@ class Jlog
     }
 
     /** 
-        Logs the passed value with the logging level JLog\Message::LEVEL_DEBUG
+        Logs the passed value with the logging level JLog::Message::LEVEL_DEBUG
         @param mixed $item An object to be logged.
-        @return void
     */
     public static function debug($item)
     {
         self::log($item, Message::LEVEL_DEBUG);
     }
 
-    /** 
-        Flushes the logging system (if buffering is enabled)
-        @return void
-    */
-    public static function flush()
+    // applies the settings from an array
+    private static function _applySettingsFromArray(array $settings)
     {
-        if (!isset(self::$_instance)) {
-            throw new Exception('JLog must be initialized with a call to JLog::init()');
-        }
+        // if no groups are specified, we use the default groups
+        // if some groups are specified, we overwrite the defaults
+        $groups = isset($settings['groups']) && is_array($settings['groups']) ?
+            $settings['groups'] : array();
+        // merge the default settings and specified settings
+        $toReturn = array_merge_recursive(self::$_defaultSettings, $settings);
+        // ensure the groups are non-empty (if they are, use the defaults)
+        $toReturn['groups'] = count($groups) ? $groups : self::$_defaultSettings['groups'];
+        return $toReturn;
+    }
 
-        self::$_instance->_flush();
-        self::$_instance = null;
+    // applies the settings from a file path
+    private static function _applySettingsFromFilePath($filePath)
+    {
+        $settings = json_decode(file_get_contents($filePath), true);
+        // if we have a valid array, use the other helper method to setup the settings
+        // otherwise return the defaults
+        return is_array($settings) ?
+            self::_applySettingsFromArray($settings) : self::$_defaultSettings;
     }
 }

@@ -1,16 +1,20 @@
 <?php
 /**
     @file JLog/Transaction.php
-    @brief Implementation of the JLog\Transaction class.
+    @brief Contains the class definition of JLog::Transaction.
  */
 
+/**
+    @namespace JLog
+    @brief The main JLog namespace.
+ */
 namespace JLog;
 
-use JLog\Storage\StdOutStorage;
-
 /**
-    @class JLogTransaction
-    @brief Abstract base class for all transactions.
+    @class JLog::Transaction
+    @brief A transaction represents a single web request.
+    @details All items that are logged within a single request belong to the same transaction. A new
+    transaction is created each time JLog::JLog::init() is called.
  */
 class Transaction
 {
@@ -23,9 +27,12 @@ class Transaction
 
     /**
         Constructor for the class.
-        @param mixed $id The unique identifier for this transaction.
+        @param array $settings The settings for this transaction.
+        @param StorageFactory|null $storageFactory (optional) An optional storage factory to use.
+        An instance of JLog::StorageFactory will be used if not provided.
+        @throws Exception Throws an exception if the settings are invalid.
      */
-    public function __construct($settings, $storageFactory = null)
+    public function __construct(array $settings, $storageFactory = null)
     {
         $this->_settings = $settings;
         if (!isset($storageFactory)) {
@@ -72,9 +79,14 @@ class Transaction
         } while (false === $idIsValid);
     }
 
+    /**
+        Returns the unique transaction ID.
+        @retval string The unique transaction ID.
+     */
     public function getId()
     {
         if (!isset($this->_id)) {
+            // generate a new ID if none is present yet
             $this->_generateNewId();
         }
         return $this->_id;
@@ -84,7 +96,6 @@ class Transaction
         Logs the object $item onto this transaction at the specified $level.
         @param mixed $item The item to be logged.
         @param int $level The logging level.
-        @return void
      */
     public final function log($item, $level)
     {
@@ -101,15 +112,7 @@ class Transaction
         }
     }
 
-    private function _writeStorage($storage, $message)
-    {
-        $storage->preWrite($this);
-        $storage->write($message);
-        $storage->postWrite($this);
-    }
-
-    // constructs the _fullMessage array from the environment
-    // @todo SECRET SAUCE GOES HERE
+    // constructs the full message array to be logged
     private function _constructFullMessage(Message $message, $level)
     {
         return array(
@@ -118,10 +121,17 @@ class Transaction
             'contents'    => trim($message->__toString())
         );
     }
+
+    // performs the actual write to a storage mechanism
+    private function _writeStorage($storage, $message)
+    {
+        $storage->preWrite($this);
+        $storage->write($message);
+        $storage->postWrite($this);
+    }
     
     /**
-        Removes all objects currently in this transaction's log.
-        @return void
+        Notifies all underlying storage mechanisms to flush their contents and close. 
      */
     public final function flush()
     {
